@@ -10,5 +10,5 @@ Matlab</span> Fuzzy Logic Toolbox&trade user who is trying to move to open-sourc
 solutions. It fairly closely follows ML syntax and stores its FIS objects in
 a similar fashion. Also included in the package is a FIS parser for parsing
 <span style="font-variant: small-caps">Matlab</span> FIS files. This parsing
-is dependent on the Python module [link](https://pypi.python.org/pypi/parse "`parse`")
+is dependent on the Python module [`parse`](https://pypi.python.org/pypi/parse "Parse Link")
 
