@@ -27,13 +27,10 @@ class FIS:
         self.rule = []
 
     def __str__(self):
-        sys_level = ['name','type','andMethod','orMethod',
+        sys_atts = ['name','type','andMethod','orMethod',
                      'defuzzMethod','impMethod','aggMethod']
-#        var_level = ['name','range','mf']
-#        mf_level = ['name','type','params']
-#        rule_level = []
         s = ''
-        for att in sys_level:
+        for att in sys_atts:
             s += '{0:>13}: {1}\n'.format(att,self.__dict__[att])
         s += '{:>13}:\n'.format('input')
         for inp in self.input:
