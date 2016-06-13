@@ -34,16 +34,16 @@ class FIS:
 #        rule_level = []
         s = ''
         for att in sys_level:
-            s += '%s: %s\n' % (att,self.__dict__[att])
-        s += 'input:\n'
+            s += '{0:>13}: {1}\n'.format(att,self.__dict__[att])
+        s += '{:>13}:\n'.format('input')
         for inp in self.input:
             s += inp.__str__('\t')
-        s += '\noutput:\n'
+        s += '{:>13}:\n'.format('output')
         for outp in self.output:
             s += outp.__str__('\t')
-        s += '\nrule:'
+        s += '{:>13}:\n'.format('rule')
         for rule in self.rule:
-            s += rule.__str__('\t') + '\n'
+            s += rule.__str__('\t\t') + '\n'
         return s
 
 
@@ -125,8 +125,8 @@ class FuzzyVar:
         var_atts = ['name','range']
         s = ''
         for att in var_atts:
-            s += indent + '%s: %s\n' % (att,self.__dict__[att])
-        s += indent + 'mf:\n'
+            s += indent + '{0:>10}: {1}\n'.format(att,self.__dict__[att])
+        s += indent + '{:>10}:\n'.format('mf')
         for mf in self.mf:
             s += mf.__str__(indent+'\t') + '\n'
         return s
@@ -160,7 +160,7 @@ class MF:
         mf_atts = ['name','type','params']
         s = ''
         for att in mf_atts:
-            s += indent + '%s: %s\n' % (att,self.__dict__[att])
+            s += indent + '{0:>10}: {1}\n'.format(att,self.__dict__[att])
         return s
 
     def evalmf(self,x):
