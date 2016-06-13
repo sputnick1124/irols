@@ -4,7 +4,9 @@ Created on Thu Jun  9 13:52:10 2016
 
 @author: nick
 """
-from pyfuzz import FIS
+import sys
+sys.path.append('..')
+from yapflm import FIS
 import matplotlib.pyplot as plt
 
 myfis = FIS('myfis')
@@ -18,10 +20,13 @@ myfis.output[0].addmf('l','trimf',[0.3741   , 1.1991  ,  1.4066])
 rules = [[0,0,1,1],[1,1,1,1],[2,1,1,1]]
 myfis.addrule(rules)
 
+print(myfis)
+
 dx = 0.01
 x = [dx*i for i in range(100)]
 ya = map(lambda x: x**(0.45), x)
 yf = [myfis.evalfis(xx) for xx in x]
 
 plt.plot(x,ya,'b',x,yf,'g--')
-plt.legend(['x^.45',"Fuzzy Approx"],loc='northwest')
+plt.legend(['x^.45',"Fuzzy Approx"],loc='best')
+plt.show()
