@@ -351,5 +351,4 @@ class Rule(object):
         s = ant + ', ' + con + '  ({%d}) : {%d}'%(num_a+num_c,num_a+num_c+1)
         a = tuple(self.antecedent) + tuple(self.consequent) + \
                                      (self.weight,self.connection,)
-        print(s,a)
         return indent + s.format(*a)
