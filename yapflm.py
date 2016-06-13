@@ -4,20 +4,14 @@ Created on Thu Jun  9 08:25:34 2016
 
 @author: nick
 """
-from __future__ import division  
-from math import exp
+from __future__ import division , print_function
+import numpy as np
   
-def prod(x):
-    y = 1
-    for _ in x:
-        y *= _
-    return y
-        
 class FIS:
-    oper =      {'max'      :   max,
-                 'min'      :   min,
-                 'sum'      :   sum,
-                 'prod'     :   prod}
+    oper =      {'max'      :   np.max,
+                 'min'      :   np.min,
+                 'sum'      :   np.sum,
+                 'prod'     :   np.prod}
                  
     def __init__(self,name,fistype='mamdani',andMethod='min',orMethod='max',
                   impMethod='min',aggMethod='max',defuzzMethod='centroid'):
@@ -31,13 +25,28 @@ class FIS:
         self.aggMethod = aggMethod
         self.defuzzMethod = defuzzMethod
         self.rule = []
-    
-    def prod(*x):
-        y = 1
-        for _ in x:
-            y *= _
-        return y
-    
+
+    def __str__(self):
+        sys_level = ['name','type','andMethod','orMethod',
+                     'defuzzMethod','impMethod','aggMethod']
+#        var_level = ['name','range','mf']
+#        mf_level = ['name','type','params']
+#        rule_level = []
+        s = ''
+        for att in sys_level:
+            s += '%s: %s\n' % (att,self.__dict__[att])
+        s += 'input:\n'
+        for inp in self.input:
+            s += inp.__str__('\t')
+        s += '\noutput:\n'
+        for outp in self.output:
+            s += outp.__str__('\t')
+        s += '\nrule:'
+        for rule in self.rule:
+            s += rule.__str__('\t') + '\n'
+        return s
+
+
     def addvar(self,vartype,varname,varrange):
         if vartype in 'input':
             self.input.append(FuzzyVar(varname,varrange))
@@ -63,16 +72,13 @@ class FIS:
             self.rule.append(Rule(antecedent,consequent,weight,connection))
     
     def evalfis(self,x):
-        if type(x) is not list:
-            x = [x]
-            if not len(self.input) == 1:
-                pass
+        if type(x) is not np.ndarray:
+            x = np.array(x)
         elif len(x) != len(self.input):
             #Throw an incorrect number of inputs exception
             pass
         numout = len(self.output)
-        ruleout = []
-        outputs = []
+	numrule = len(self.rule)
         andMethod = self.oper[self.andMethod]
         orMethod = self.oper[self.orMethod]
         impMethod = self.oper[self.impMethod]
@@ -80,7 +86,6 @@ class FIS:
         defuzzMethod = self.defuzz[self.defuzzMethod]
         comb = [andMethod,orMethod]
         for rule in self.rule:
-            ruleout.append([])
             ant = rule.antecedent
             con = rule.consequent
             weight = rule.weight
@@ -115,6 +120,16 @@ class FuzzyVar:
         self.name = varname
         self.range = varrange
         self.mf = []
+
+    def __str__(self,indent=''):
+        var_atts = ['name','range']
+        s = ''
+        for att in var_atts:
+            s += indent + '%s: %s\n' % (att,self.__dict__[att])
+        s += indent + 'mf:\n'
+        for mf in self.mf:
+            s += mf.__str__(indent+'\t') + '\n'
+        return s
         
     def addmf(self,mfname,mftype,mfparams):
         mf = MF(mfname,mftype,mfparams)
@@ -141,6 +156,13 @@ class MF:
         
         self.mf = mfdict[self.type][0]
         
+    def __str__(self,indent=''):
+        mf_atts = ['name','type','params']
+        s = ''
+        for att in mf_atts:
+            s += indent + '%s: %s\n' % (att,self.__dict__[att])
+        return s
+
     def evalmf(self,x):
         return self.mf(x)
         
@@ -274,3 +296,10 @@ class Rule:
         self.weight = weight
         self.connection = connection
 
+    def __str__(self,indent=''):
+        ant = '{} '*len(self.antecedent)
+        con = '{} '*len(self.consequent)
+        s = ant.strip() + ', ' + con + '({}) : {}'
+        a = tuple(self.antecedent) + tuple(self.consequent) + \
+                                     (self.weight,self.connection,)
+        return indent + s.format(*a)
