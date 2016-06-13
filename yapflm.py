@@ -13,7 +13,7 @@ def prod(x):
         y *= _
     return y
 
-class FIS:
+class FIS(object):
     oper =      {'max'      :   max,
                  'min'      :   min,
                  'sum'      :   sum,
@@ -53,12 +53,45 @@ class FIS:
     def addvar(self,vartype,varname,varrange):
         if vartype in 'input':
             self.input.append(FuzzyVar(varname,varrange))
+            if len(self.rule) > 0:
+                for rule in self.rule:
+                    rule.antecedent += [0]
         elif vartype in 'output':
             self.output.append(FuzzyVar(varname,varrange))
+            if len(self.rule) > 0:
+                for rule in self.rule:
+                    rule.consequent += [0]
         else:
             #Throw an invalid variable type exception
             pass
-    
+
+    def rmvar(self,vartype,varindex):
+        if vartype in 'input':
+            if varindex > len(self.input):
+                #throw invalid variable reference exception
+                pass
+            del self.input[varindex]
+            if len(self.input) == 0:
+                self.rule = []
+                return
+            if len(self.rule) > 0:
+                for rule in self.rule:
+                    del rule.antecedent[varindex]
+        elif vartype in 'output':
+            if varindex > len(self.output):
+                #throw invalid variable reference exception
+                pass
+            del self.output[varindex]
+            if len(self.output) == 0:
+                self.rule = []
+                return
+            if len(self.rule) > 0:
+                for rule in self.rule:
+                    del rule.consequent[varindex]
+        else:
+            #Throw an invalid variable type exception
+            pass
+
     def addrule(self,rules):
         numInput = len(self.input)
         numOutput = len(self.output)
@@ -83,7 +116,7 @@ class FIS:
         numout = len(self.output)
         ruleout = []
         outputs = []
-	numrule = len(self.rule)
+        numrule = len(self.rule)
         andMethod = self.oper[self.andMethod]
         orMethod = self.oper[self.orMethod]
         impMethod = self.oper[self.impMethod]
@@ -121,7 +154,7 @@ class FIS:
             totmom += y*(a + i*dx)
         return totmom/totarea
 
-class FuzzyVar:
+class FuzzyVar(object):
     def __init__(self,varname,varrange):
         self.name = varname
         self.range = varrange
@@ -142,7 +175,7 @@ class FuzzyVar:
         mf.range = self.range
         self.mf.append(mf)
 
-class MF:
+class MF(object):
     def __init__(self,mfname,mftype,mfparams):
         self.name = mfname
         self.type = mftype
@@ -295,7 +328,7 @@ class MF:
     def mfGaussian2(self):
         pass
     
-class Rule:
+class Rule(object):
     def __init__(self,antecedent,consequent,weight,connection):
         self.antecedent = antecedent
         self.consequent = consequent
@@ -305,9 +338,10 @@ class Rule:
     def __str__(self,indent=''):
         num_a = len(self.antecedent)
         num_c = len(self.consequent)
-        ant = ' '.join('{%d:>4}'%i for i in range(num_a))
-        con = ' '.join('{%d:>4}'%i for i in range(num_a,num_a+num_c))
+        ant = ' '.join('{%d!s:>4}'%i for i in range(num_a))
+        con = ' '.join('{%d!s:>4}'%i for i in range(num_a,num_a+num_c))
         s = ant + ', ' + con + '  ({%d}) : {%d}'%(num_a+num_c,num_a+num_c+1)
         a = tuple(self.antecedent) + tuple(self.consequent) + \
                                      (self.weight,self.connection,)
+        print(s,a)
         return indent + s.format(*a)

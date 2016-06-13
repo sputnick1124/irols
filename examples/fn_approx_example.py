@@ -24,7 +24,7 @@ print(myfis)
 
 dx = 0.01
 x = [dx*i for i in range(100)]
-ya = map(lambda x: x**(0.45), x)
+ya = list(map(lambda x: x**(0.45), x))
 yf = [myfis.evalfis(xx) for xx in x]
 
 plt.plot(x,ya,'b',x,yf,'g--')

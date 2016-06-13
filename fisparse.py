@@ -42,10 +42,10 @@ class FISParser:
 #                print(varnum)
             if 'input' in vartype:
                 self.fis.input[varnum].addmf(mfargs['name'], mfargs['type'],
-                                        map(float,mfargs['range'].split()))
+                                        list(map(float,mfargs['range'].split())))
             elif 'output' in vartype:
                 self.fis.output[varnum].addmf(mfargs['name'], mfargs['type'],
-                                        map(float,mfargs['range'].split()))
+                                        list(map(float,mfargs['range'].split())))
     
     def get_vars(self):
         start_ruleblock = self.rawlines.index('[Rules]\n')
