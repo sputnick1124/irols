@@ -49,6 +49,14 @@ class FIS(object):
             s += rule.__str__('\t\t') + '\n'
         return s
 
+    def encode(self):
+        pass
+
+    def decode(self):
+        pass
+
+    def randomize(self):
+        pass
 
     def addvar(self,vartype,varname,varrange):
         if vartype in 'input':
