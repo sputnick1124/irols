@@ -5,13 +5,19 @@ Created on Thu Jun  9 08:25:34 2016
 @author: nick
 """
 from __future__ import division , print_function
-import numpy as np
+from math import exp
   
+def prod(x):
+    y = 1
+    for _ in x:
+        y *= _
+    return y
+
 class FIS:
-    oper =      {'max'      :   np.max,
-                 'min'      :   np.min,
-                 'sum'      :   np.sum,
-                 'prod'     :   np.prod}
+    oper =      {'max'      :   max,
+                 'min'      :   min,
+                 'sum'      :   sum,
+                 'prod'     :   prod}
                  
     def __init__(self,name,fistype='mamdani',andMethod='min',orMethod='max',
                   impMethod='min',aggMethod='max',defuzzMethod='centroid'):
@@ -69,12 +75,14 @@ class FIS:
             self.rule.append(Rule(antecedent,consequent,weight,connection))
     
     def evalfis(self,x):
-        if type(x) is not np.ndarray:
-            x = np.array(x)
+        if not hasattr(x,'__iter__'):
+            x = [x]
         elif len(x) != len(self.input):
             #Throw an incorrect number of inputs exception
             pass
         numout = len(self.output)
+        ruleout = []
+        outputs = []
 	numrule = len(self.rule)
         andMethod = self.oper[self.andMethod]
         orMethod = self.oper[self.orMethod]
@@ -83,6 +91,7 @@ class FIS:
         defuzzMethod = self.defuzz[self.defuzzMethod]
         comb = [andMethod,orMethod]
         for rule in self.rule:
+            ruleout.append([])
             ant = rule.antecedent
             con = rule.consequent
             weight = rule.weight
@@ -173,7 +182,7 @@ class MF:
             b = -a
         #Fake linspace until I bring in numpy for the time being. Baby steps...
         dx = (b - a)/(points-1)
-        xlinspace = [a + i*dx for i in range(100)] + [b]
+        xlinspace = [a + i*dx for i in range(points-1)] + [b]
         return [self.mf(x) for x in xlinspace]
     
     def mfTriangle(self,x,params=None):
