@@ -6,10 +6,10 @@ Created on Thu Jun  9 15:31:11 2016
 """
 from __future__ import division
 from parse import parse
-from pyfuzz import FIS
+from yapflm import FIS
 from time import time
 
-class fisparser:
+class FISParser:
     def __init__(self,fisfile):
         with open(fisfile,'r') as infis:
             self.rawlines = infis.readlines()
@@ -89,10 +89,11 @@ class fisparser:
         self.fis.addrule(rules)
             
         
-myfisparse = fisparser('Stockton_opt_ic2.fis')
-fis = myfisparse.fis
-T1 = time()
-for i in range(1000):
-    fis.evalfis([0,0])
-print('1000 loops, %0.2f ms per loop'%((time()-T1)))
+if __name__ == "__main__":
+    myfisparse = FISParser('examples/tipper.fis')
+    fis = myfisparse.fis
+    T1 = time()
+    for i in range(1000):
+        fis.evalfis([6.6,9.8])
+    print('1000 loops, %0.2f ms per loop'%((time()-T1)))
     
