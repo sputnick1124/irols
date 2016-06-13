@@ -311,3 +311,5 @@ class Rule:
         a = tuple(self.antecedent) + tuple(self.consequent) + \
                                      (self.weight,self.connection,)
         return indent + s.format(*a)
+
+
