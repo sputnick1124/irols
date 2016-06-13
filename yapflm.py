@@ -303,9 +303,11 @@ class Rule:
         self.connection = connection
 
     def __str__(self,indent=''):
-        ant = '{} '*len(self.antecedent)
-        con = '{} '*len(self.consequent)
-        s = ant.strip() + ', ' + con + '({}) : {}'
+        num_a = len(self.antecedent)
+        num_c = len(self.consequent)
+        ant = ' '.join('{%d:>4}'%i for i in range(num_a))
+        con = ' '.join('{%d:>4}'%i for i in range(num_a,num_a+num_c))
+        s = ant + ', ' + con + '  ({%d}) : {%d}'%(num_a+num_c,num_a+num_c+1)
         a = tuple(self.antecedent) + tuple(self.consequent) + \
                                      (self.weight,self.connection,)
         return indent + s.format(*a)
