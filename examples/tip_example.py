@@ -1,5 +1,5 @@
 # Nick fuzzy Tip
-import sys
+import sys,timeit
 sys.path.append('..')
 from yapflm import FIS
 #import matplotlib.pyplot as plt
@@ -30,4 +30,12 @@ qual = 6.5
 serv = 9.8
 out = 'quality is {0} and service is {1}, tip is {2:0.4g}%'.format(qual,serv,tipfis.evalfis([qual,serv]))
 
+
 print(out)
+
+t0 = timeit.default_timer()
+timetrials = 10000
+for timetrial in range(timetrials):
+    output = tipfis.evalfis([serv,qual])
+t1 = timeit.default_timer()
+print((t1-t0)/timetrials)
