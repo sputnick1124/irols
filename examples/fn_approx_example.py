@@ -7,6 +7,7 @@ Created on Thu Jun  9 13:52:10 2016
 import sys
 sys.path.append('..')
 from yapflm import FIS
+from fisparse import FISParser
 import matplotlib.pyplot as plt
 
 myfis = FIS('myfis')
@@ -20,6 +21,8 @@ myfis.output[0].addmf('l','trimf',[0.3741   , 1.1991  ,  1.4066])
 rules = [[0,0,1,1],[1,1,1,1],[2,1,1,1]]
 myfis.addrule(rules)
 
+#myfisparser = FISParser('fuzzy_crt_opt.fis')
+#myfis = myfisparser.fis
 print(myfis)
 
 dx = 0.01
