@@ -1,0 +1,188 @@
+<?xml version='1.0'?>
+<sdf version='1.5'>
+  <model name='landing_pad'>
+    <link name='landing_pad_link'>
+      <pose frame=''>0 0 0 0 -0 0</pose>
+      <gravity>1</gravity>
+      <self_collide>0</self_collide>
+      <kinematic>0</kinematic>
+      <visual name='main_circle'>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+        <geometry>
+          <cylinder>
+            <radius>0.255</radius>
+            <length>0.004</length>
+          </cylinder>
+        </geometry>
+        <material>
+          <lighting>1</lighting>
+          <script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/Yellow</name>
+          </script>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+          <specular>0.1 0.1 0.1 1.0</specular>
+          <emissive>0 0 0 0</emissive>
+          <shader type='vertex'>
+            <normal_map>__default__</normal_map>
+          </shader>
+        </material>
+        <cast_shadows>1</cast_shadows>
+        <transparency>0</transparency>
+      </visual>
+      <visual name='inner_circle'>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+        <geometry>
+          <cylinder>
+            <radius>0.1625</radius>
+            <length>0.0041</length>
+          </cylinder>
+        </geometry>
+        <material>
+          <lighting>1</lighting>
+          <script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/FlatBlack</name>
+          </script>
+          <shader type='vertex'>
+            <normal_map>__default__</normal_map>
+          </shader>
+        </material>
+        <cast_shadows>1</cast_shadows>
+        <transparency>0</transparency>
+      </visual>
+      <!--Apparently theres a bug with polyline and GTS with Gazebo6?
+       ---The GTS library is found at compile time... but still no-->
+      <!--visual name='h_visual'>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+        <geometry>
+          <polyline>
+            <point>-0.090 0.090</point>
+            <point>-0.048 0.090</point>
+            <point>-0.048 0.022</point>
+            <point>0.048 0.022</point>
+            <point>0.048 0.090</point>
+            <point>0.090 0.090</point>
+            <point>0.090 -0.090</point>
+            <point>0.048 -0.090</point>
+            <point>0.048 -0.022</point>
+            <point>-0.048 -0.022</point>
+            <point>-0.048 -0.090</point>
+            <point>-0.090 -0.090</point>
+            <point>-0.090 0.090</point>
+            <height>0.0042</height>
+          </polyline>
+        </geometry>
+        <material>
+          <lighting>1</lighting>
+          <script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/Yellow</name>
+          </script>
+          <shader type='vertex'>
+            <normal_map>__default__</normal_map>
+          </shader>
+        </material>
+        <cast_shadows>1</cast_shadows>
+        <transparency>0</transparency>
+      </visual-->
+      <visual name='h_left'>
+        <pose frame=''>-0.069 0 0 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>0.042 0.180 0.0042</size>
+          </box>
+        </geometry>
+        <material>
+          <lighting>1</lighting>
+          <script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/Yellow</name>
+          </script>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+          <specular>0.1 0.1 0.1 1.0</specular>
+          <emissive>0 0 0 0</emissive>
+          <shader type='vertex'>
+            <normal_map>__default__</normal_map>
+          </shader>
+        </material>
+        <cast_shadows>1</cast_shadows>
+        <transparency>0</transparency>
+      </visual>
+      <visual name='h_right'>
+        <pose frame=''>0.069 0 0 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>0.042 0.180 0.0042</size>
+          </box>
+        </geometry>
+        <material>
+          <lighting>1</lighting>
+          <script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/Yellow</name>
+          </script>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+          <specular>0.1 0.1 0.1 1.0</specular>
+          <emissive>0 0 0 0</emissive>
+          <shader type='vertex'>
+            <normal_map>__default__</normal_map>
+          </shader>
+        </material>
+        <cast_shadows>1</cast_shadows>
+        <transparency>0</transparency>
+      </visual>
+      <visual name='h_center'>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>0.096 0.044 0.0042</size>
+          </box>
+        </geometry>
+        <material>
+          <lighting>1</lighting>
+          <script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/Yellow</name>
+          </script>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+          <specular>0.1 0.1 0.1 1.0</specular>
+          <emissive>0 0 0 0</emissive>
+          <shader type='vertex'>
+            <normal_map>__default__</normal_map>
+          </shader>
+        </material>
+        <cast_shadows>1</cast_shadows>
+        <transparency>0</transparency>
+      </visual>
+      <collision name='collision'>
+        <laser_retro>0</laser_retro>
+        <max_contacts>10</max_contacts>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+        <geometry>
+          <cylinder>
+            <radius>0.255</radius>
+            <length>0.004</length>
+          </cylinder>
+        </geometry>
+        <surface>
+          <friction>
+            <ode>
+              <mu>1</mu>
+              <mu2>1</mu2>
+              <fdir1>0 0 0</fdir1>
+              <slip1>0</slip1>
+              <slip2>0</slip2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+    </link>
+    <static>1</static>
+    <allow_auto_disable>1</allow_auto_disable>
+  </model>
+</sdf>

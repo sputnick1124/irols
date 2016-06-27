@@ -7,7 +7,7 @@
   <arg name="gui" default="true"/>
   <arg name="headless" default="false"/>
   <arg name="log" default="false"/>
-  <arg name="logfile" default=""/>
+  <arg name="log_dir" default="$(find irols/gazebo/logs"/>
   <arg name="debug" default="false"/>
   <arg name="physics" default="ode"/>
   <arg name="verbose" default="false"/>
@@ -24,7 +24,7 @@
   <arg unless="$(arg headless)" name="command_arg2" value=""/>
   <arg     if="$(arg headless)" name="command_arg2" value="-r"/>
   <arg unless="$(arg log)" name="command_arg3" value=""/>
-  <arg     if="$(arg log)" name="command_arg3" value="--record_path $(arg logfile)"/>
+  <arg     if="$(arg log)" name="command_arg3" value="--record_path $(arg log_dir)"/>
   <arg unless="$(arg verbose)" name="command_arg4" value=""/>
   <arg     if="$(arg verbose)" name="command_arg4" value="--verbose"/>
   <arg unless="$(arg debug)" name="script_type" value="gzserver"/>

@@ -1,0 +1,27 @@
+<launch>
+    <!-- Posix SITL environment launch script -->
+
+    <arg name="headless" default="false"/>
+    <arg name="gui" default="true"/>
+    <arg name="log" default="false"/>
+    <arg name="log_dir" default=""/>
+    <arg name="ns" default="/"/>
+    <arg name="world" default="irols_cam"/>
+    <arg name="build" default="posix_sitl_default"/>
+
+echo $(find irols)/build_$(build)
+    <node pkg="irols" type="sitl_run.sh" name="simulator" args="$(find irols)/configs/rcS none gazebo $(arg world) $(find irols)/Firmware/build_$(arg build)" output="screen" launch-prefix="xterm -e">
+        <env name="no_sim" value="1" />
+	<env name="GAZEBO_MODEL_PATH" value="$(find irols)/gazebo/models:$GAZEBO_MODEL_PATH}"/>
+	<env name="GAZEBO_RESOURCE_PATH" value="$(find irols)/gazebo/worlds:$GAZEBO_RESOURCE_PATH}"/>
+    </node>
+
+    <include file="$(find irols)/launch/empty_world_log.launch">
+        <arg name="headless" value="$(arg headless)"/>
+        <arg name="gui" value="$(arg gui)"/>
+        <arg name="log" value="$(arg log)"/>
+        <arg name="log_dir" value="$(arg log_dir)"/>
+        <arg name="world_name" value="$(find irols)/gazebo/worlds/$(arg world).world" />
+        <!--arg name="world_name" value="$(arg world)" /-->
+    </include>
+</launch>

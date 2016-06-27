@@ -6,16 +6,16 @@
 
 if [ "$#" -lt 1 ]
 then
-    SRC_DIR=/home/uav_master/Documents/pixhawk/Firmware
+    SRC_DIR=/home/uav_master/ros_ws/src/irols
 else
     SRC_DIR=$1
 fi
 
 
 # setup Gazebo env and update package path
-export GAZEBO_MODEL_PATH=${GAZEBO_MODEL_PATH}:${SRC_DIR}/Tools/sitl_gazebo/models
-export GAZEBO_PLUGIN_PATH=${SRC_DIR}/build_gazebo:${GAZEBO_PLUGIN_PATH}
-export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${SRC_DIR}/Tools/sitl_gazebo/Build/msgs/
+export GAZEBO_MODEL_PATH=${GAZEBO_MODEL_PATH}:${SRC_DIR}/gazebo/models
+export GAZEBO_PLUGIN_PATH=${GAZEBO_PLUGIN_PATH}:${SRC_DIR}/Firmware/sitl_gazebo
+export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${SRC_DIR}/Firmware/Tools/sitl_gazebo/Build/msgs/
 export ROS_PACKAGE_PATH=${ROS_PACKAGE_PATH}:${SRC_DIR}
-export GAZEBO_MODEL_DATABASE_URI=""
-export SITL_GAZEBO_PATH=$SRC_DIR/Tools/sitl_gazebo
+#export GAZEBO_MODEL_DATABASE_URI=""
+export SITL_GAZEBO_PATH=$SRC_DIR/Firmware/Tools/sitl_gazebo

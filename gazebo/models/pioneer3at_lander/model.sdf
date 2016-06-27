@@ -1,0 +1,45 @@
+<?xml version="1.0" ?>
+<sdf version="1.4">
+  <model name="pioneer3at_lander">
+
+    <include>
+      <uri>model://pioneer3at</uri>
+      <pose>0 0 0.18 0 0 0</pose>
+    </include>
+
+    <include>
+      <uri>model://landing_pad</uri>
+      <pose>0 0 0.33 0 0 1.57</pose>
+    </include>
+
+    <joint name="landing_pad" type="revolute">
+      <parent>pioneer3at::chassis</parent>
+      <child>landing_pad::landing_pad_link</child>
+      <axis>
+        <limit>
+          <upper>0</upper>
+          <lower>0</lower>
+        </limit>
+      <xyz>0 0 1</xyz>
+      </axis>
+    </joint>
+    <plugin name="skid_steer_drive_controller" filename="libgazebo_ros_skid_steer_drive.so">
+      <updateRate>1000.0</updateRate>
+      <robotNamespace>p3at</robotNamespace>
+      <leftFrontJoint>pioneer3at::left_front</leftFrontJoint>
+      <rightFrontJoint>pioneer3at::right_front</rightFrontJoint>
+      <leftRearJoint>pioneer3at::left_rear</leftRearJoint>
+      <rightRearJoint>pioneer3at::right_rear</rightRearJoint>
+      <wheelSeparation>0.4</wheelSeparation>
+      <wheelDiameter>0.215</wheelDiameter>
+      <robotBaseFrame>chassis</robotBaseFrame>
+      <torque>500</torque>
+      <commandTopic>cmd_vel</commandTopic>
+      <odometryTopic>odom</odometryTopic>
+      <odometryFrame>odom</odometryFrame>
+      <broadcastTF>false</broadcastTF>
+    </plugin>
+
+  </model>
+</sdf>
+

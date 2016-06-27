@@ -12,3 +12,10 @@ again with some modifications (changed friction model, added landing platform,
 attached ros skid steer controller, etc).
 
 Dependencies for running the simulation include ROS, Gazebo6, PX4Firmware.
+
+**Run simulation**
+`source gazebo/setup_gazebo_ros.bash`
+`roslaunch irols mavros_posix_sitl_irols.launch`
+
+Rover control is exerted at `/p3at/cmd_vel` with a `geometry_msgs/Twist` msg.
+The downward-facing camera is exposed in the namespace `/camera1`.
