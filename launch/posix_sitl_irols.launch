@@ -10,7 +10,7 @@
     <arg name="build" default="posix_sitl_default"/>
 
 echo $(find irols)/build_$(build)
-    <node pkg="irols" type="sitl_run.sh" name="simulator" args="$(find irols)/configs/rcS none gazebo $(arg world) $(find irols)/Firmware/build_$(arg build)" output="screen" launch-prefix="xterm -e">
+    <node pkg="irols" type="irols_run.sh" name="simulator" args="$(find irols)/configs/rcS none gazebo $(arg world) $(find irols)/Firmware/build_$(arg build)" output="screen" launch-prefix="terminator --new-tab -x">
         <env name="no_sim" value="1" />
 	<env name="GAZEBO_MODEL_PATH" value="$(find irols)/gazebo/models:$GAZEBO_MODEL_PATH}"/>
 	<env name="GAZEBO_RESOURCE_PATH" value="$(find irols)/gazebo/worlds:$GAZEBO_RESOURCE_PATH}"/>

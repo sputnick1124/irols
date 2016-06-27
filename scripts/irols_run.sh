@@ -117,18 +117,18 @@ set +e
 # Start Java simulator
 if [ "$debugger" == "lldb" ]
 then
-	lldb -- mainapp ../../../../${rc_script}_${program}_${model}
+	lldb -- mainapp ${rc_script}_${program}_${model}
 elif [ "$debugger" == "gdb" ]
 then
-	gdb --args mainapp ../../../../${rc_script}_${program}_${model}
+	gdb --args mainapp ${rc_script}_${program}_${model}
 elif [ "$debugger" == "ddd" ]
 then
-	ddd --debugger gdb --args mainapp ../../../../${rc_script}_${program}_${model}
+	ddd --debugger gdb --args mainapp ${rc_script}_${program}_${model}
 elif [ "$debugger" == "valgrind" ]
 then
-	valgrind ./mainapp ../../../../${rc_script}_${program}_${model}
+	valgrind ./mainapp ${rc_script}_${program}_${model}
 else
-	$sudo_enabled ./mainapp $chroot_enabled ../../../../${rc_script}_${program}_${model}
+	$sudo_enabled ./mainapp $chroot_enabled ${rc_script}_${program}_${model}
 fi
 
 if [ "$program" == "jmavsim" ]
