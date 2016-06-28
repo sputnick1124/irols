@@ -5,15 +5,18 @@ Created on Thu Jun  9 08:25:34 2016
 @author: nick
 """
 from __future__ import division , print_function
-from numpy import exp, min, max, prod, sum
+import numpy as np
 from collections import deque
 import random
   
 class FIS(object):
-    oper =      {'max'      :   max,
-                 'min'      :   min,
-                 'sum'      :   sum,
-                 'prod'     :   prod}
+    comboper =  {'max'      :   np.max,
+                 'min'      :   np.min}
+                 
+    oper =      {'max'      :   np.maximum,
+                 'min'      :   np.minimum,
+                 'sum'      :   np.sum,
+                 'prod'     :   np.prod}
                  
     def __init__(self,name,fistype='mamdani',andMethod='min',orMethod='max',
                   impMethod='min',aggMethod='max',defuzzMethod='centroid'):
@@ -132,10 +135,10 @@ class FIS(object):
         ruleout = []
         outputs = []
 #        numrule = len(self.rule)
-        andMethod = self.oper[self.andMethod]
-        orMethod = self.oper[self.orMethod]
+        andMethod = self.comboper[self.andMethod]
+        orMethod = self.comboper[self.orMethod]
         impMethod = self.oper[self.impMethod]
-        aggMethod = self.oper[self.aggMethod]
+        aggMethod = self.comboper[self.aggMethod]
         defuzzMethod = self.defuzz[self.defuzzMethod]
         comb = [andMethod,orMethod]
         for rule in self.rule:
@@ -150,24 +153,26 @@ class FIS(object):
             for out in xrange(numout):
                 outset = self.output[out].mf[con[out]].evalset()
                 rulestrength = weight*comb[conn](mfout)
-                ruleout[-1].append([impMethod([rulestrength,y]) for y in outset])
+                ruleout[-1].append(impMethod(rulestrength,outset))
         for o in xrange(numout):
-            ruletemp = [r[o] for r in ruleout]
-            agg = [aggMethod([y[i] for y in ruletemp]) 
-                                             for i in xrange(len(ruletemp[0]))]
+#            ruletemp = [r[o] for r in ruleout]
+#            agg = [aggMethod([y[i] for y in ruletemp]) for i in xrange(len(ruletemp[0]))]
+            agg = aggMethod(ruleout,axis=0)
             outputs.append(defuzzMethod(agg,o))
         return outputs if len(outputs)>1 else outputs[0]
         
     def defuzzCentroid(self,agg,out):
         a,b = self.output[out].range
-        points = len(agg)
+#        points = len(agg)
+#        print(agg)
+        points = agg.shape[1]
         dx = (b-a)/(points - 1)
-        totarea = sum(agg)
+        totarea = np.sum(agg)
         if totarea == 0:
             print('Total area was zero. Using average of the range instead')
             return (a+b)/2
         totmom = 0
-        for i,y in enumerate(agg):
+        for i,y in enumerate(agg[0]):
             totmom += y*(a + i*dx)
         return totmom/totarea
 
