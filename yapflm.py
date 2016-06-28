@@ -30,6 +30,7 @@ class FIS(object):
         self.aggMethod = aggMethod
         self.defuzzMethod = defuzzMethod
         self.rule = []
+        self._points = 101
 
     def __str__(self):
         sys_atts = ['name','type','andMethod','orMethod',
@@ -50,7 +51,7 @@ class FIS(object):
 
     def encode(self):
         var = self.input + self.output
-        return sum((sum([mf.params for mf in v.mf],[]) for v in var),[])
+        return deque(sum((sum([mf.params for mf in v.mf],[]) for v in var),[]))
 
     def decode(self,encoded):
         var = self.input + self.output
@@ -58,7 +59,7 @@ class FIS(object):
         for i,num_in in enumerate(num_mf):
             for mf in xrange(num_in):
                 params = var[i].mf[mf].params
-                params = [encoded.popleft() for _ in params] 
+                var[i].mf[mf].params = [encoded.popleft() for _ in params] 
 
     def randomize(self):
         # This only works for well-order param lists (like tri and trap)
@@ -141,6 +142,7 @@ class FIS(object):
         aggMethod = self.comboper[self.aggMethod]
         defuzzMethod = self.defuzz[self.defuzzMethod]
         comb = [andMethod,orMethod]
+        self.output_x = [np.linspace(*out.range,num=self._points) for out in self.output]
         for rule in self.rule:
             ruleout.append([])
             ant = rule.antecedent
@@ -151,7 +153,7 @@ class FIS(object):
                                     for i,a in enumerate(ant) if a is not None]
             # Generalize for multiple output systems. Easy
             for out in xrange(numout):
-                outset = self.output[out].mf[con[out]].evalset()
+                outset = self.output[out].mf[con[out]].evalmf(self.output_x[out])
                 rulestrength = weight*comb[conn](mfout)
                 ruleout[-1].append(impMethod(rulestrength,outset))
         for o in xrange(numout):
@@ -163,17 +165,12 @@ class FIS(object):
         
     def defuzzCentroid(self,agg,out):
         a,b = self.output[out].range
-#        points = len(agg)
-#        print(agg)
-        points = agg.shape[1]
-        dx = (b-a)/(points - 1)
         totarea = np.sum(agg)
         if totarea == 0:
             print('Total area was zero. Using average of the range instead')
             return (a+b)/2
         totmom = 0
-        for i,y in enumerate(agg[0]):
-            totmom += y*(a + i*dx)
+        totmom = np.sum(agg[0]*self.output_x[out])
         return totmom/totarea
 
 class FuzzyVar(object):
@@ -226,59 +223,58 @@ class MF(object):
 
     def evalmf(self,x):
         return self.mf(x)
-        
-    def evalset(self,points=101):
-        if hasattr(self,'range'):
-            a,b = self.range
-        elif not 'gauss' in self.type:
-            a,b = self.params[0],self.params[-1]
-        else:
-            a = self.params[1] - 6*self.params[0]
-            b = -a
-        #Fake linspace until I bring in numpy for the time being. Baby steps...
-        dx = (b - a)/(points-1)
-        xlinspace = [a + i*dx for i in xrange(points-1)] + [b]
-        return [self.mf(x) for x in xlinspace]
     
     def mfTriangle(self,x,params=None):
         if params is not None:
             a,b,c = params
         else:
             a,b,c = self.params
-        check = [b<a,c<b,a==b,b==c,a<=x<=c]
+#        check = [b<a,c<b,a==b,b==c,a<=x<=c]
+        check = [b<a,c<b,a==b,b==c]
         if any(check[:2]):
             #Throw an invalid param exception
+            print("something's wrong")
             pass
-        if not check[4]:
-#            print('outside of range')
-            return 0
+        ###Method 1
+#        if check[2]:
+#            return np.where(np.bitwise_and(x>a,x<c),(c-x)/(c-b),0)
+#        elif check[3]:
+#            return np.where(np.bitwise_and(x>a,x<c),(x-a)/(b-a),0)
+#        else:
+#            return np.where(np.bitwise_and(x>a,x<c),np.minimum((x-a)/(b-a),(c-x)/(c-b)),0)
+        ###Method 2
+        flag = 0
+        if type(x) is np.ndarray:
+            flag = 1
+            i = np.bitwise_and(x>a,x<c)
         if check[2]:
-            return (c-x)/(c-b)
+            retval = (c-x)/(c-b)
         elif check[3]:
-            return (x-a)/(b-a)
+            retval = (x-a)/(b-a)
         else:
-            return min((x-a)/(b-a),(c-x)/(c-b))
+            retval = np.minimum((x-a)/(b-a),(c-x)/(c-b))
+        if flag:
+            retval[np.bitwise_not(i)] = 0
+        return retval
+        
             
     def mfTrapezoid(self,x,params=None):
         if params is not None:
             a,b,c,d = params
         else:
             a,b,c,d = self.params
-        check = [b<a,c<b,d<c,a==b,b==c,c==d,a<=x<=d]
+        check = [b<a,c<b,d<c,a==b,b==c,c==d]
         if any(check[:3]):
             #Throw an invalid param exception
             pass
-        if not check[6]:
-#            print('outside of range')
-            return 0
         if check[4]:
             return self.mfTriangle(x,[a,b,d])
         if check[3]:
-            return min(1,(d-x)/(d-c))
+            return np.where(np.bitwise_and(x>a,x<c),np.minimum(1,(d-x)/(d-c)),0)
         if check[5]:
-            return min((x-a)/(b-a),1)
+            return np.where(np.bitwise_and(x>a,x<c),np.minimum((x-a)/(b-a),1),0)
         else:
-            return min((x-a)/(b-a),1,(d-x)/(d-c))
+            return np.where(np.bitwise_and(x>a,x<c),np.minimum((x-a)/(b-a),1,(d-x)/(d-c)),0)
     
     def mfTruncTriLeftUpper(self,x,params=None):
         if params is not None:
@@ -345,7 +341,7 @@ class MF(object):
             #Throw invalid param exception
             pass
         t = (x-c)/sigma
-        return exp(-t*t/2)
+        return np.exp(-t*t/2)
     
     def mfGaussian2(self):
         pass

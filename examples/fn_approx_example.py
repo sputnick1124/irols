@@ -8,11 +8,10 @@ import sys
 sys.path.append('..')
 from yapflm import FIS
 from fisparse import FISParser
-import matplotlib.pyplot as plt
 
 myfis = FIS('myfis')
 myfis.addvar('input','x',[-0.5,1.5])
-myfis.addvar('output','y',[0.5,1.0])
+myfis.addvar('output','y',[-0.5,1.5])
 myfis.input[0].addmf('s','trimf',[-0.1895 ,  -0.0194   , 0.8362])
 myfis.input[0].addmf('m','trimf',[0.8054  ,  1.0101,    1.3791])
 myfis.input[0].addmf('b','trimf',[0.0048  ,  0.5913   , 1.0248])
@@ -32,6 +31,7 @@ yf = [myfis.evalfis(xx) for xx in x]
 
 
 
-#plt.plot(x,ya,'b',x,yf,'g--')
-#plt.legend(['x^.45',"Fuzzy Approx"],loc='best')
-#plt.show()
+import matplotlib.pyplot as plt
+plt.plot(x,ya,'b',x,yf,'g--')
+plt.legend(['x^.45',"Fuzzy Approx"],loc='best')
+plt.show()
