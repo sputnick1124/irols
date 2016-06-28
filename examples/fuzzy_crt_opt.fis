@@ -1,0 +1,32 @@
+[System]
+Name='fuzzy_crt_opt'
+Type='mamdani'
+Version=2.0
+NumInputs=1
+NumOutputs=1
+NumRules=3
+AndMethod='min'
+OrMethod='max'
+ImpMethod='min'
+AggMethod='max'
+DefuzzMethod='centroid'
+
+[Input1]
+Name='x'
+Range=[-0.5 1.5]
+NumMFs=3
+MF1='S':'trimf',[-0.18954632077048 -0.0194291556163696 0.836200706702193]
+MF2='M':'trimf',[0.805388255758675 1.010092111492 1.37905791422443]
+MF3='B':'trimf',[0.00478442394460438 0.591282226584112 1.02483757451782]
+
+[Output1]
+Name='y'
+Range=[-0.5 1.5]
+NumMFs=2
+MF1='SM':'trimf',[-0.183127521658356 -0.0561531355660018 0.510329634814773]
+MF2='L':'trimf',[0.374105057973943 1.19909885129731 1.40660394503168]
+
+[Rules]
+1, 1 (1) : 1
+2, 2 (1) : 1
+3, 2 (1) : 1

@@ -6,6 +6,8 @@ Created on Thu Jun  9 08:25:34 2016
 """
 from __future__ import division , print_function
 from math import exp
+from collections import deque
+import random
   
 def prod(x):
     y = 1
@@ -50,13 +52,24 @@ class FIS(object):
         return s
 
     def encode(self):
-        pass
+        var = self.input + self.output
+        return sum((sum([mf.params for mf in v.mf],[]) for v in var),[])
 
-    def decode(self):
-        pass
+    def decode(self,encoded):
+        var = self.input + self.output
+        num_mf = [len(v.mf) for v in var]
+        for i,num_in in enumerate(num_mf):
+            for mf in xrange(num_in):
+                params = var[i].mf[mf].params
+                params = [encoded.popleft() for _ in params] 
 
     def randomize(self):
-        pass
+        # This only works for well-order param lists (like tri and trap)
+        out = []
+        for var in self.input + self.output:
+            for mf in var.mf:
+                out += sorted(random.uniform(*var.range) for p in mf.params)
+        return out
 
     def addvar(self,vartype,varname,varrange):
         if vartype in 'input':
@@ -124,7 +137,7 @@ class FIS(object):
         numout = len(self.output)
         ruleout = []
         outputs = []
-        numrule = len(self.rule)
+#        numrule = len(self.rule)
         andMethod = self.oper[self.andMethod]
         orMethod = self.oper[self.orMethod]
         impMethod = self.oper[self.impMethod]
@@ -137,15 +150,17 @@ class FIS(object):
             con = rule.consequent
             weight = rule.weight
             conn = rule.connection
-            mfout = [self.input[i].mf[a].evalmf(x[i]) for i,a in enumerate(ant) if a is not None]
+            mfout = [self.input[i].mf[a].evalmf(x[i]) 
+                                    for i,a in enumerate(ant) if a is not None]
             # Generalize for multiple output systems. Easy
-            for out in range(numout):
+            for out in xrange(numout):
                 outset = self.output[out].mf[con[out]].evalset()
                 rulestrength = weight*comb[conn](mfout)
                 ruleout[-1].append([impMethod([rulestrength,y]) for y in outset])
-        for o in range(numout):
+        for o in xrange(numout):
             ruletemp = [r[o] for r in ruleout]
-            agg = [aggMethod([y[i] for y in ruletemp]) for i in range(len(ruletemp[0]))]
+            agg = [aggMethod([y[i] for y in ruletemp]) 
+                                             for i in xrange(len(ruletemp[0]))]
             outputs.append(defuzzMethod(agg,o))
         return outputs if len(outputs)>1 else outputs[0]
         
@@ -223,7 +238,7 @@ class MF(object):
             b = -a
         #Fake linspace until I bring in numpy for the time being. Baby steps...
         dx = (b - a)/(points-1)
-        xlinspace = [a + i*dx for i in range(points-1)] + [b]
+        xlinspace = [a + i*dx for i in xrange(points-1)] + [b]
         return [self.mf(x) for x in xlinspace]
     
     def mfTriangle(self,x,params=None):
@@ -335,7 +350,7 @@ class MF(object):
     
     def mfGaussian2(self):
         pass
-    
+        
 class Rule(object):
     def __init__(self,antecedent,consequent,weight,connection):
         self.antecedent = antecedent
@@ -346,8 +361,8 @@ class Rule(object):
     def __str__(self,indent=''):
         num_a = len(self.antecedent)
         num_c = len(self.consequent)
-        ant = ' '.join('{%d!s:>4}'%i for i in range(num_a))
-        con = ' '.join('{%d!s:>4}'%i for i in range(num_a,num_a+num_c))
+        ant = ' '.join('{%d!s:>4}'%i for i in xrange(num_a))
+        con = ' '.join('{%d!s:>4}'%i for i in xrange(num_a,num_a+num_c))
         s = ant + ', ' + con + '  ({%d}) : {%d}'%(num_a+num_c,num_a+num_c+1)
         a = tuple(self.antecedent) + tuple(self.consequent) + \
                                      (self.weight,self.connection,)
