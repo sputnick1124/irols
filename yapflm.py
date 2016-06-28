@@ -137,11 +137,7 @@ class FIS(object):
         numout = len(self.output)
         ruleout = []
         outputs = []
-<<<<<<< HEAD
-        numrule = len(self.rule)
-=======
 #        numrule = len(self.rule)
->>>>>>> ga_optims
         andMethod = self.oper[self.andMethod]
         orMethod = self.oper[self.orMethod]
         impMethod = self.oper[self.impMethod]
