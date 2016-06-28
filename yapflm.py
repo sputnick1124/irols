@@ -231,10 +231,10 @@ class MF(object):
             a,b,c = self.params
 #        check = [b<a,c<b,a==b,b==c,a<=x<=c]
         check = [b<a,c<b,a==b,b==c]
-#        if any(check[:2]):
-#            #Throw an invalid param exception
-#            print("something's wrong")
-#            pass
+        if any(check[:2]):
+            #Throw an invalid param exception
+            print("something's wrong")
+            pass
         ###Method 1 -- Marginally slower than 2
 #        if check[2]:
 #            return np.where(np.bitwise_and(x>a,x<c),(c-x)/(c-b),0)
@@ -243,10 +243,7 @@ class MF(object):
 #        else:
 #            return np.where(np.bitwise_and(x>a,x<c),np.minimum((x-a)/(b-a),(c-x)/(c-b)),0)
         ###Method 2
-        flag = 0
-        if type(x) is np.ndarray:
-            flag = 1
-            i = np.bitwise_and(x>a,x<c)
+        flag = type(x) is np.ndarray
         if check[2]:
             retval = (c-x)/(c-b)
         elif check[3]:
@@ -254,7 +251,7 @@ class MF(object):
         else:
             retval = np.minimum((x-a)/(b-a),(c-x)/(c-b))
         if flag:
-            retval[np.bitwise_not(i)] = 0
+            retval[np.bitwise_or(x<a,x>c)] = 0
         return retval
         
             
@@ -267,14 +264,18 @@ class MF(object):
         if any(check[:3]):
             #Throw an invalid param exception
             pass
+        flag = type(x) is np.ndarray
         if check[4]:
             return self.mfTriangle(x,[a,b,d])
         if check[3]:
-            return np.where(np.bitwise_and(x>a,x<c),np.minimum(1,(d-x)/(d-c)),0)
+            retval = np.minimum(1,(d-x)/(d-c))
         if check[5]:
-            return np.where(np.bitwise_and(x>a,x<c),np.minimum((x-a)/(b-a),1),0)
+            retval =np.minimum((x-a)/(b-a),1)
         else:
-            return np.where(np.bitwise_and(x>a,x<c),np.minimum((x-a)/(b-a),1,(d-x)/(d-c)),0)
+            retval = np.minimum(np.minimum((x-a)/(b-a),(d-x)/(d-c)),1)
+        if flag:
+            retval[np.bitwise_or(x<a,x>d)] = 0
+        return retval
     
     def mfTruncTriLeftUpper(self,x,params=None):
         if params is not None:
