@@ -5,16 +5,10 @@ Created on Thu Jun  9 08:25:34 2016
 @author: nick
 """
 from __future__ import division , print_function
-from math import exp
+from numpy import exp, min, max, prod, sum
 from collections import deque
 import random
   
-def prod(x):
-    y = 1
-    for _ in x:
-        y *= _
-    return y
-
 class FIS(object):
     oper =      {'max'      :   max,
                  'min'      :   min,
