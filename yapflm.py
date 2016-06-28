@@ -231,11 +231,11 @@ class MF(object):
             a,b,c = self.params
 #        check = [b<a,c<b,a==b,b==c,a<=x<=c]
         check = [b<a,c<b,a==b,b==c]
-        if any(check[:2]):
-            #Throw an invalid param exception
-            print("something's wrong")
-            pass
-        ###Method 1
+#        if any(check[:2]):
+#            #Throw an invalid param exception
+#            print("something's wrong")
+#            pass
+        ###Method 1 -- Marginally slower than 2
 #        if check[2]:
 #            return np.where(np.bitwise_and(x>a,x<c),(c-x)/(c-b),0)
 #        elif check[3]:

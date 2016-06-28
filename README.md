@@ -12,3 +12,6 @@ a similar fashion. Also included in the package is a FIS parser for parsing
 <span style="font-variant: small-caps">Matlab</span> FIS files. This parsing
 is dependent on the Python module [`parse`](https://pypi.python.org/pypi/parse "Parse Link")
 
+The numpy2 branch (numpy broke, so I started over) implements numpy arrays in the place of
+lists and list comprehension where feasible (lowest hanging fruit first). To date, it cuts
+execution time in less than half for a call to FIS.evalfis().
