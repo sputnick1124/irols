@@ -1,4 +1,5 @@
 # Nick fuzzy Tip
+from __future__ import print_function
 import sys,timeit
 sys.path.append('..')
 from yapflm import FIS
@@ -24,7 +25,7 @@ rules = [[0,0,0,1,1],
          [2,2,2,1,1]]
 
 tipfis.addrule(rules)
-#print(tipfis)
+print(tipfis)
 
 qual = 6.5
 serv = 9.8
