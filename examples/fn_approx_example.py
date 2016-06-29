@@ -34,7 +34,7 @@ fns = [fn1,fn2,fn3]
 
 fis_list = [f for f in os.listdir(os.getcwd()) if 'opt.fis' in f]
 
-fis_index = 1
+fis_index = 2
 fisparser = FISParser(fis_list[fis_index])
 fis = fisparser.fis
 #myfisparser = FISParser('fuzzy_crt_opt.fis')
@@ -44,6 +44,10 @@ fis = fisparser.fis
 xs = [np.linspace(0,1,1000),
       np.linspace(-1,1,1000),
       np.linspace(-10,10,1000)]
+#dx = 0.001
+#x = [dx*i for i in range(1000)]
+#ya = list(map(lambda x: x**(0.45), x))
+#yf = [myfis.evalfis(xx) for xx in x]
 x = xs[fis_index]
 ya = fns[fis_index](x)
 yf = [fis.evalfis(xx) for xx in x]
