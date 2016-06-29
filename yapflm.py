@@ -243,7 +243,7 @@ class MF(object):
 #        else:
 #            return np.where(np.bitwise_and(x>a,x<c),np.minimum((x-a)/(b-a),(c-x)/(c-b)),0)
         ###Method 2
-        flag = type(x) is np.ndarray
+        flag = (type(x) is np.ndarray)
         if check[2]:
             retval = (c-x)/(c-b)
         elif check[3]:
@@ -264,7 +264,7 @@ class MF(object):
         if any(check[:3]):
             #Throw an invalid param exception
             pass
-        flag = type(x) is np.ndarray
+        flag = (type(x) is np.ndarray)
         if check[4]:
             return self.mfTriangle(x,[a,b,d])
         if check[3]:
@@ -286,7 +286,12 @@ class MF(object):
         if any(check):
             #Throw an inalid parameter exception
             pass
-        if x<=c:
+        flag = (type(x) is np.ndarray)
+        if flag:
+            retval = self.mfTriangle(x,[a,b,d])
+            retval[x<=c] = 1
+            return retval
+        elif x<=c:
             return 1
         else:
             return self.mfTriangle(x,[a,b,d])
@@ -300,7 +305,12 @@ class MF(object):
         if any(check):
             #Throw an inalid parameter exception
             pass
-        if x<=b:
+        flag = (type(x) is np.ndarray)
+        if flag:
+            retval = self.mfTriangle(x,[a,c,d])
+            retval[x<=b] = 0
+            return retval
+        elif x<=b:
             return 0
         else:
             return self.mfTriangle(x,[a,c,d])
@@ -314,7 +324,12 @@ class MF(object):
         if any(check):
             #Throw an inalid parameter exception
             pass
-        if x>=b:
+        flag = (type(x) is np.ndarray)
+        if flag:
+            retval = self.mfTriangle(x,[a,c,d])
+            retval[x>=b] = 1
+            return retval
+        elif x>=b:
             return 1
         else:
             return self.mfTriangle(x,[a,c,d])
@@ -328,7 +343,12 @@ class MF(object):
         if any(check):
             #Throw an inalid parameter exception
             pass
-        if x>=c:
+        flag = (type(x) is np.ndarray)
+        if flag:
+            retval = self.mfTriangle(x,[a,b,d])
+            retval[x>=c] = 0
+            return retval
+        elif x>=c:
             return 0
         else:
             return self.mfTriangle(x,[a,b,d])

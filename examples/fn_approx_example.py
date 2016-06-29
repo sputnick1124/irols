@@ -8,15 +8,17 @@ import sys, os
 sys.path.append('..')
 from yapflm import FIS
 from fisparse import FISParser
+import numpy as np
 
 def fn1(x):
     return list(map(lambda x:x**0.45,x))
 
 def fn2(x):
+    return [i if -0.8<i<0.8 else -0.8 if i<=-0.8 else 0.8 for i in x]
+    
+def fn3(x):
     return list(map(lambda x:x*x,x))
 
-def fn3(x):
-    return [i if -0.8<i<0.8 else 0 for i in x]
 
 fns = [fn1,fn2,fn3]
 #myfis = FIS('myfis')
@@ -32,21 +34,25 @@ fns = [fn1,fn2,fn3]
 
 fis_list = [f for f in os.listdir(os.getcwd()) if 'opt.fis' in f]
 
-fis_index = 0
-fisparser = FISParser(f[fis_index])
+fis_index = 1
+fisparser = FISParser(fis_list[fis_index])
 fis = fisparser.fis
 #myfisparser = FISParser('fuzzy_crt_opt.fis')
 #myfis = myfisparser.fis
-print(myfis)
+#print(fis)
 
-dx = 0.001
-x = [dx*i for i in range(1000)]
-ya = list(map(lambda x: x**(0.45), x))
-yf = [myfis.evalfis(xx) for xx in x]
+xs = [np.linspace(0,1,1000),
+      np.linspace(-1,1,1000),
+      np.linspace(-10,10,1000)]
+x = xs[fis_index]
+ya = fns[fis_index](x)
+yf = [fis.evalfis(xx) for xx in x]
 
-
+labels = ['x^0.45',
+          '       {-0.8 if x<=-0.8\nx = {x\n       {0.8 if x>=0.8',
+          'x^2']
 ## Plot results
 #import matplotlib.pyplot as plt
 #plt.plot(x,ya,'b',x,yf,'g--')
-#plt.legend(['x^.45',"Fuzzy Approx"],loc='best')
+#plt.legend([labels[fis_index],"Fuzzy Approx"],loc='best')
 #plt.show()
