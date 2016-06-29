@@ -262,15 +262,16 @@ class MF(object):
             a,b,c,d = self.params
         check = [b<a,c<b,d<c,a==b,b==c,c==d]
         if any(check[:3]):
-            #Throw an invalid param exception
+            #TODO: Throw an invalid param exception
             pass
         flag = (type(x) is np.ndarray)
         if check[4]:
             return self.mfTriangle(x,[a,b,d])
         if check[3]:
+            #TODO: account for edge case of square-cornered trapezoid
             retval = np.minimum(1,(d-x)/(d-c))
-        if check[5]:
-            retval =np.minimum((x-a)/(b-a),1)
+        elif check[5]:
+            retval = np.minimum((x-a)/(b-a),1)
         else:
             retval = np.minimum(np.minimum((x-a)/(b-a),(d-x)/(d-c)),1)
         if flag:

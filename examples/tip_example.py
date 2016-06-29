@@ -24,7 +24,7 @@ rules = [[0,0,0,1,1],
          [2,2,2,1,1]]
 
 tipfis.addrule(rules)
-print(tipfis)
+#print(tipfis)
 
 qual = 6.5
 serv = 9.8
@@ -38,4 +38,5 @@ timetrials = 10000
 for timetrial in range(timetrials):
     output = tipfis.evalfis([serv,qual])
 t1 = timeit.default_timer()
-print((t1-t0)/timetrials)
+print("Took ", (t1-t0), " seconds to complete ", timetrials, " calls")
+print("Averaged to be ", (t1-t0)/timetrials, " seconds per call")
