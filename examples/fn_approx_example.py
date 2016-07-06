@@ -34,7 +34,7 @@ fns = [fn1,fn2,fn3]
 
 fis_list = [f for f in os.listdir(os.getcwd()) if 'opt.fis' in f]
 
-fis_index = 2
+fis_index = 1
 fisparser = FISParser(fis_list[fis_index])
 fis = fisparser.fis
 #myfisparser = FISParser('fuzzy_crt_opt.fis')
@@ -56,7 +56,7 @@ labels = ['x^0.45',
           '       {-0.8 if x<=-0.8\nx = {x\n       {0.8 if x>=0.8',
           'x^2']
 ## Plot results
-#import matplotlib.pyplot as plt
-#plt.plot(x,ya,'b',x,yf,'g--')
-#plt.legend([labels[fis_index],"Fuzzy Approx"],loc='best')
-#plt.show()
+import matplotlib.pyplot as plt
+plt.plot(x,ya,'b',x,yf,'g--')
+plt.legend([labels[fis_index],"Fuzzy Approx"],loc='best')
+plt.show()

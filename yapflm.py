@@ -20,7 +20,7 @@ class FIS(object):
                  
     def __init__(self,name,fistype='mamdani',andMethod='min',orMethod='max',
                   impMethod='min',aggMethod='max',defuzzMethod='centroid'):
-        self.defuzz =    {'centroid' :   self.defuzzCentroid} 
+        self.defuzz =    {'centroid' :   defuzzCentroid} 
         self.input,self.output = [],[]
         self.name = name
         self.type = fistype
@@ -49,34 +49,20 @@ class FIS(object):
             s += rule.__str__('\t\t') + '\n'
         return s
 
-    def encode(self):
-        var = self.input + self.output
-        return deque(sum((sum([mf.params for mf in v.mf],[]) for v in var),[]))
+    def __eq__(self,other):
+        return self.__dict__ == other.__dict__
 
-    def decode(self,encoded):
-        var = self.input + self.output
-        num_mf = [len(v.mf) for v in var]
-        for i,num_in in enumerate(num_mf):
-            for mf in xrange(num_in):
-                params = var[i].mf[mf].params
-                var[i].mf[mf].params = [encoded.popleft() for _ in params] 
-
-    def randomize(self):
-        # This only works for well-order param lists (like tri and trap)
-        out = []
-        for var in self.input + self.output:
-            for mf in var.mf:
-                out += sorted(random.uniform(*var.range) for p in mf.params)
-        return out
+    def check(self):
+        return all(var.check() for var in self.input + self.output)
 
     def addvar(self,vartype,varname,varrange):
         if vartype in 'input':
-            self.input.append(FuzzyVar(varname,varrange))
+            self.input.append(FuzzyVar(varname,varrange,self,1))
             if len(self.rule) > 0:
                 for rule in self.rule:
                     rule.antecedent += [0]
         elif vartype in 'output':
-            self.output.append(FuzzyVar(varname,varrange))
+            self.output.append(FuzzyVar(varname,varrange,self,0))
             if len(self.rule) > 0:
                 for rule in self.rule:
                     rule.consequent += [0]
@@ -114,7 +100,7 @@ class FIS(object):
     def addrule(self,rules):
         numInput = len(self.input)
         numOutput = len(self.output)
-        if not any(isinstance(rule,list) for rule in rules):
+        if not any(hasattr(rule,'__iter__') for rule in rules):
             rules = [rules]
         for rule in rules:
             if not len(rule) != sum([numInput,numOutput,2]):
@@ -160,24 +146,20 @@ class FIS(object):
 #            ruletemp = [r[o] for r in ruleout]
 #            agg = [aggMethod([y[i] for y in ruletemp]) for i in xrange(len(ruletemp[0]))]
             agg = aggMethod(ruleout,axis=0)
-            outputs.append(defuzzMethod(agg,o))
+            outputs.append(defuzzMethod(agg,self.output[o].range,self.output_x[o]))
         return outputs if len(outputs)>1 else outputs[0]
-        
-    def defuzzCentroid(self,agg,out):
-        a,b = self.output[out].range
-        totarea = np.sum(agg)
-        if totarea == 0:
-            print('Total area was zero. Using average of the range instead')
-            return (a+b)/2
-        totmom = 0
-        totmom = np.sum(agg[0]*self.output_x[out])
-        return totmom/totarea
 
 class FuzzyVar(object):
-    def __init__(self,varname,varrange):
+    def __init__(self,varname,varrange,parent=None,vartype=None):
         self.name = varname
         self.range = varrange
         self.mf = []
+        self.parent = parent
+        if vartype:
+            self.num = len(parent.input)
+        elif vartype == 0:
+            self.num = len(parent.output)
+        self.vartype = vartype
 
     def __str__(self,indent=''):
         var_atts = ['name','range']
@@ -188,31 +170,60 @@ class FuzzyVar(object):
         for mf in self.mf:
             s += mf.__str__(indent+'\t') + '\n'
         return s
-        
-    def addmf(self,mfname,mftype,mfparams):
-        mf = MF(mfname,mftype,mfparams)
+ 
+    def __eq__(self,other):
+        local_dict = self.__dict__.copy()
+        other_dict = other.__dict__.copy()
+        local_dict.pop('parent')
+        other_dict.pop('parent')
+        return local_dict == other_dict
+
+    def check(self):
+        retval =  any(mf.evalmf(None) for mf in self.mf)
+        return retval
+
+    def addmf(self,mfname,mftype,mfparams=None):
+        try:
+            mf = MF(mfname,mftype,mfparams,self)
+        except ParamError as e:
+            raise e
         mf.range = self.range
         self.mf.append(mf)
 
+
 class MF(object):
-    def __init__(self,mfname,mftype,mfparams):
+    def __init__(self,mfname,mftype,mfparams,parent=None):
         self.name = mfname
         self.type = mftype
-        self.params = mfparams
-        
-        mfdict = {'trimf'           :   (self.mfTriangle,3),
-                  'trapmf'          :   (self.mfTrapezoid,4),
-                  'trunctrilumf'    :   (self.mfTruncTriLeftUpper,4),
-                  'trunctrillmf'    :   (self.mfTruncTriLeftLower,4),
-                  'trunctrirumf'    :   (self.mfTruncTriRightUpper,4),
-                  'trunctrirlmf'    :   (self.mfTruncTriRightLower,4),
-                  'gaussmf'         :   (self.mfGaussian,2),
-                  'gauss2mf'        :   (self.mfGaussian2,2)}
+
+        mfdict = {'trimf'           :   (mfTriangle,3),
+                  'trapmf'          :   (mfTrapezoid,4),
+                  'trunctrilumf'    :   (mfTruncTriLeftUpper,4),
+                  'trunctrillmf'    :   (mfTruncTriLeftLower,4),
+                  'trunctrirumf'    :   (mfTruncTriRightUpper,4),
+                  'trunctrirlmf'    :   (mfTruncTriRightLower,4),
+                  'gaussmf'         :   (mfGaussian,2),
+                  'gauss2mf'        :   (mfGaussian2,2)}
+
+        self.mf = mfdict[self.type][0]
+        if mfparams is not None:
+            self.params = mfparams
+        elif parent is not None:
+            r = parent.range[1] - parent.range[0]
+            p = mfdict[self.type][1]
+            dr = r/(p-1)
+            self.params = [parent.range[0]+i*dr for i in xrange(p)]
+        else:
+            self.params = [0]*mfdict[self.type][1]
         if not mfdict[self.type][1] == len(self.params):
             #Throw invalid param number exception
+#            raise(Exception)
             pass
-        
-        self.mf = mfdict[self.type][0]
+        try:
+            self.mf(None,self.params)
+#            self.params = mfparams
+        except ParamError as e:
+            raise e
         
     def __str__(self,indent=''):
         mf_atts = ['name','type','params']
@@ -221,152 +232,15 @@ class MF(object):
             s += indent + '{0:>10}: {1}\n'.format(att,self.__dict__[att])
         return s
 
+    def __eq__(self,other):
+        local_dict = self.__dict__.copy()
+        other_dict = other.__dict__.copy()
+        local_dict.pop('parent')
+        other_dict.pop('parent')
+        return local_dict == other_dict
+
     def evalmf(self,x):
-        return self.mf(x)
-    
-    def mfTriangle(self,x,params=None):
-        if params is not None:
-            a,b,c = params
-        else:
-            a,b,c = self.params
-#        check = [b<a,c<b,a==b,b==c,a<=x<=c]
-        check = [b<a,c<b,a==b,b==c]
-        if any(check[:2]):
-            #Throw an invalid param exception
-            print("something's wrong")
-            pass
-        ###Method 1 -- Marginally slower than 2
-#        if check[2]:
-#            return np.where(np.bitwise_and(x>a,x<c),(c-x)/(c-b),0)
-#        elif check[3]:
-#            return np.where(np.bitwise_and(x>a,x<c),(x-a)/(b-a),0)
-#        else:
-#            return np.where(np.bitwise_and(x>a,x<c),np.minimum((x-a)/(b-a),(c-x)/(c-b)),0)
-        ###Method 2
-        flag = (type(x) is np.ndarray)
-        if check[2]:
-            retval = (c-x)/(c-b)
-        elif check[3]:
-            retval = (x-a)/(b-a)
-        else:
-            retval = np.minimum((x-a)/(b-a),(c-x)/(c-b))
-        if flag:
-            retval[np.bitwise_or(x<a,x>c)] = 0
-        return retval
-        
-            
-    def mfTrapezoid(self,x,params=None):
-        if params is not None:
-            a,b,c,d = params
-        else:
-            a,b,c,d = self.params
-        check = [b<a,c<b,d<c,a==b,b==c,c==d]
-        if any(check[:3]):
-            #TODO: Throw an invalid param exception
-            pass
-        flag = (type(x) is np.ndarray)
-        if check[4]:
-            return self.mfTriangle(x,[a,b,d])
-        if check[3]:
-            #TODO: account for edge case of square-cornered trapezoid
-            retval = np.minimum(1,(d-x)/(d-c))
-        elif check[5]:
-            retval = np.minimum((x-a)/(b-a),1)
-        else:
-            retval = np.minimum(np.minimum((x-a)/(b-a),(d-x)/(d-c)),1)
-        if flag:
-            retval[np.bitwise_or(x<a,x>d)] = 0
-        return retval
-    
-    def mfTruncTriLeftUpper(self,x,params=None):
-        if params is not None:
-            a,b,c,d = params
-        else:
-            a,b,c,d = self.params
-        check = [b<a,c<b,d<c]
-        if any(check):
-            #Throw an inalid parameter exception
-            pass
-        flag = (type(x) is np.ndarray)
-        if flag:
-            retval = self.mfTriangle(x,[a,b,d])
-            retval[x<=c] = 1
-            return retval
-        elif x<=c:
-            return 1
-        else:
-            return self.mfTriangle(x,[a,b,d])
-
-    def mfTruncTriLeftLower(self,x,params=None):
-        if params is not None:
-            a,b,c,d = params
-        else:
-            a,b,c,d = self.params
-        check = [b<a,c<b,d<c]
-        if any(check):
-            #Throw an inalid parameter exception
-            pass
-        flag = (type(x) is np.ndarray)
-        if flag:
-            retval = self.mfTriangle(x,[a,c,d])
-            retval[x<=b] = 0
-            return retval
-        elif x<=b:
-            return 0
-        else:
-            return self.mfTriangle(x,[a,c,d])
-
-    def mfTruncTriRightUpper(self,x,params=None):
-        if params is not None:
-            a,b,c,d = params
-        else:
-            a,b,c,d = self.params
-        check = [b<a,c<b,d<c]
-        if any(check):
-            #Throw an inalid parameter exception
-            pass
-        flag = (type(x) is np.ndarray)
-        if flag:
-            retval = self.mfTriangle(x,[a,c,d])
-            retval[x>=b] = 1
-            return retval
-        elif x>=b:
-            return 1
-        else:
-            return self.mfTriangle(x,[a,c,d])
-
-    def mfTruncTriRightLower(self,x,params=None):
-        if params is not None:
-            a,b,c,d = params
-        else:
-            a,b,c,d = self.params
-        check = [b<a,c<b,d<c]
-        if any(check):
-            #Throw an inalid parameter exception
-            pass
-        flag = (type(x) is np.ndarray)
-        if flag:
-            retval = self.mfTriangle(x,[a,b,d])
-            retval[x>=c] = 0
-            return retval
-        elif x>=c:
-            return 0
-        else:
-            return self.mfTriangle(x,[a,b,d])
-
-    def mfGaussian(self,x,params=None):
-        if params is not None:
-            sigma,c = params
-        else:
-            sigma,c = self.params
-        if sigma == 0:
-            #Throw invalid param exception
-            pass
-        t = (x-c)/sigma
-        return np.exp(-t*t/2)
-    
-    def mfGaussian2(self):
-        pass
+        return self.mf(x,self.params)
         
 class Rule(object):
     def __init__(self,antecedent,consequent,weight,connection):
@@ -385,4 +259,169 @@ class Rule(object):
                                      (self.weight,self.connection,)
         return indent + s.format(*a)
 
+    def __eq__(self,other):
+        return self.__dict__ == other.__dict__
 
+def mfTriangle(x,params):
+    a,b,c = params
+    check = [a==b,b==c]
+    if x is None:
+        err = [b<a,c<b]
+        if any(err):
+            #Throw an invalid param exception
+            errs = ['b<a', 'c<b']
+            e = [errs[i] for i,_ in enumerate(err) if _]
+            raise ParamError(params,'Invalid params {}: {}'.format(e,params))
+        else:
+            return 0 #Everything looks good
+    flag = (type(x) is np.ndarray)
+    if check[0]:
+        retval = (c-x)/(c-b)
+    elif check[1]:
+        retval = (x-a)/(b-a)
+    else:
+        retval = np.minimum((x-a)/(b-a),(c-x)/(c-b))
+    if flag:
+        retval[np.bitwise_or(x<a,x>c)] = 0
+    return retval
+    
+        
+def mfTrapezoid(x,params):
+    a,b,c,d = params
+    check = [a==b,b==c,c==d]
+    if x is None:
+        err = [b<a,c<b,d<c]
+        if any(err):
+            #Throw an invalid param exception
+            errs = ['b<a','c<b','d<c']
+            e = [errs[i] for i,_ in enumerate(err) if _]
+            raise ParamError(params,'Invalid params {}: {}'.format(e,params))
+        else:
+            return 0 #Everything looks good
+    flag = (type(x) is np.ndarray)
+    if check[1]:
+        return mfTriangle(x,[a,b,d])
+    if check[0]:
+        #TODO: account for edge case of square-cornered trapezoid
+        retval = np.minimum(1,(d-x)/(d-c))
+    elif check[2]:
+        retval = np.minimum((x-a)/(b-a),1)
+    else:
+        retval = np.minimum(np.minimum((x-a)/(b-a),(d-x)/(d-c)),1)
+    if flag:
+        retval[np.bitwise_or(x<a,x>d)] = 0
+    return retval
+
+def mfTruncTriLeftUpper(x,params):
+    a,b,c,d = params
+    if x is None:
+        err = [b<a,c<b,d<c]
+        if any(err):
+            #Throw an invalid param exception
+            errs = ['b<a','c<b','d<c']
+            e = [errs[i] for i,_ in enumerate(err) if _]
+            raise ParamError(params,'Invalid params {}: {}'.format(e,params))
+        else:
+            return 0 #Everything looks good
+    flag = (type(x) is np.ndarray)
+    if flag:
+        retval = mfTriangle(x,[a,b,d])
+        retval[x<=c] = 1
+        return retval
+    elif x<=c:
+        return 1
+    else:
+        return mfTriangle(x,[a,b,d])
+
+def mfTruncTriLeftLower(x,params):
+    a,b,c,d = params
+    if x is None:
+        err = [b<a,c<b,d<c]
+        if any(err):
+            #Throw an invalid param exception
+            errs = ['b<a','c<b','d<c']
+            e = [errs[i] for i,_ in enumerate(err) if _]
+            raise ParamError(params,'Invalid params {}: {}'.format(e,params))
+        else:
+            return 0 #Everything looks good
+    flag = (type(x) is np.ndarray)
+    if flag:
+        retval = mfTriangle(x,[a,c,d])
+        retval[x<=b] = 0
+        return retval
+    elif x<=b:
+        return 0
+    else:
+        return mfTriangle(x,[a,c,d])
+
+def mfTruncTriRightUpper(x,params):
+    a,b,c,d = params
+    if x is None:
+        err = [b<a,c<b,d<c]
+        if any(err):
+            #Throw an invalid param exception
+            errs = ['b<a','c<b','d<c']
+            e = [errs[i] for i,_ in enumerate(err) if _]
+            raise ParamError(params,'Invalid params {}: {}'.format(e,params))
+        else:
+            return 0 #Everything looks good
+    flag = (type(x) is np.ndarray)
+    if flag:
+        retval = mfTriangle(x,[a,c,d])
+        retval[x>=b] = 1
+        return retval
+    elif x>=b:
+        return 1
+    else:
+        return mfTriangle(x,[a,c,d])
+
+def mfTruncTriRightLower(x,params):
+    a,b,c,d = params
+    if x is None:
+        err = [b<a,c<b,d<c]
+        if any(err):
+            #Throw an invalid param exception
+            errs = ['b<a','c<b','d<c']
+            e = [errs[i] for i,_ in enumerate(err) if _]
+            raise ParamError(params,'Invalid params {}: {}'.format(e,params))
+        else:
+            return 0 #Everything looks good
+    flag = (type(x) is np.ndarray)
+    if flag:
+        retval = mfTriangle(x,[a,b,d])
+        retval[x>=c] = 0
+        return retval
+    elif x>=c:
+        return 0
+    else:
+        return mfTriangle(x,[a,b,d])
+
+def mfGaussian(x,params):
+    sigma,c = params
+    if sigma == 0:
+        #Throw invalid param exception
+        pass
+    t = (x-c)/sigma
+    return np.exp(-t*t/2)
+
+def mfGaussian2():
+    pass
+
+def defuzzCentroid(agg, outrange, outx):
+    a, b = outrange
+    totarea = np.sum(agg)
+    if totarea == 0:
+        print('Total area was zero. Using average of the range instead')
+        return (a + b) / 2
+    totmom = np.sum(agg[0] * outx)
+    return totmom / totarea
+
+class Error(Exception):
+    pass
+
+class ParamError(Error):
+    def __init__(self,params,msg):
+        self.params = params
+        self.msg = msg
+    def __str__(self):
+        return repr(self.msg)
