@@ -19,6 +19,10 @@ def fn2(x):
 def fn3(x):
     return list(map(lambda x:x*x,x))
 
+if len(sys.argv) > 1:
+	fis_index = int(sys.argv[1])
+else:
+	fis_index = 0
 
 fns = [fn1,fn2,fn3]
 #myfis = FIS('myfis')
@@ -34,7 +38,6 @@ fns = [fn1,fn2,fn3]
 
 fis_list = [f for f in os.listdir(os.getcwd()) if 'opt.fis' in f]
 
-fis_index = 1
 fisparser = FISParser(fis_list[fis_index])
 fis = fisparser.fis
 #myfisparser = FISParser('fuzzy_crt_opt.fis')
