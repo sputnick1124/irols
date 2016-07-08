@@ -6,7 +6,6 @@ Created on Thu Jun  9 13:52:10 2016
 """
 import sys, os
 sys.path.append('..')
-from yapflm import FIS
 from fisparse import FISParser
 import numpy as np
 
@@ -22,7 +21,7 @@ def fn3(x):
 if len(sys.argv) > 1:
 	fis_index = int(sys.argv[1])
 else:
-	fis_index = 0
+	fis_index = 2
 
 fns = [fn1,fn2,fn3]
 #myfis = FIS('myfis')

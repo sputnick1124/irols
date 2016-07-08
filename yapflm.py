@@ -6,8 +6,6 @@ Created on Thu Jun  9 08:25:34 2016
 """
 from __future__ import division , print_function
 import numpy as np
-from collections import deque
-import random
   
 class FIS(object):
     comboper =  {'max'      :   np.max,
@@ -18,7 +16,7 @@ class FIS(object):
                  'sum'      :   np.sum,
                  'prod'     :   np.prod}
                  
-    def __init__(self,name,fistype='mamdani',andMethod='min',orMethod='max',
+    def __init__(self,name='',fistype='mamdani',andMethod='min',orMethod='max',
                   impMethod='min',aggMethod='max',defuzzMethod='centroid'):
         self.defuzz =    {'centroid' :   defuzzCentroid} 
         self.input,self.output = [],[]
@@ -98,6 +96,7 @@ class FIS(object):
             pass
 
     def addrule(self,rules):
+#        print(rules)
         numInput = len(self.input)
         numOutput = len(self.output)
         if not any(hasattr(rule,'__iter__') for rule in rules):
