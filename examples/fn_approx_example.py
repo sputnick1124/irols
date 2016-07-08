@@ -21,7 +21,7 @@ def fn3(x):
 if len(sys.argv) > 1:
 	fis_index = int(sys.argv[1])
 else:
-	fis_index = 2
+	fis_index = 0
 
 fns = [fn1,fn2,fn3]
 #myfis = FIS('myfis')
@@ -43,7 +43,7 @@ fis = fisparser.fis
 #myfis = myfisparser.fis
 #print(fis)
 
-xs = [np.linspace(0,1,1000),
+xs = [np.linspace(0,1,100000),
       np.linspace(-1,1,1000),
       np.linspace(-10,10,1000)]
 #dx = 0.001
@@ -51,14 +51,14 @@ xs = [np.linspace(0,1,1000),
 #ya = list(map(lambda x: x**(0.45), x))
 #yf = [myfis.evalfis(xx) for xx in x]
 x = xs[fis_index]
-ya = fns[fis_index](x)
+#ya = fns[fis_index](x)
 yf = [fis.evalfis(xx) for xx in x]
 
-labels = ['x^0.45',
-          '       {-0.8 if x<=-0.8\nx = {x\n       {0.8 if x>=0.8',
-          'x^2']
+#labels = ['x^0.45',
+#          '       {-0.8 if x<=-0.8\nx = {x\n       {0.8 if x>=0.8',
+#          'x^2']
 ## Plot results
-import matplotlib.pyplot as plt
-plt.plot(x,ya,'b',x,yf,'g--')
-plt.legend([labels[fis_index],"Fuzzy Approx"],loc='best')
-plt.show()
+#import matplotlib.pyplot as plt
+#plt.plot(x,ya,'b',x,yf,'g--')
+#plt.legend([labels[fis_index],"Fuzzy Approx"],loc='best')
+#plt.show()

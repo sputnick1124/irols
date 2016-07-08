@@ -118,13 +118,13 @@ class model_fitness(object):
 fn0 = lambda x: x**(0.45)
 fn1 = lambda x: x if -0.8<x<0.8 else -0.8 if x<=-0.8 else 0.8
 fn2 = lambda x: x*x
-fitness1 = fitness_fn(fn2,-10,10)
+fitness1 = fitness_fn(fn0,0,1)
 
 ic = [0.2,0]
 
-myfis = GFS(init=[5,(1<<4)+(1<<0),3,0],inRange=[-13,13],outRange=[-5,120])
+#myfis = GFS(init=[5,(1<<4)+(1<<0),3,0],inRange=[-13,13],outRange=[-5,120])
 #myfis._points = 1001
-#myfis = GFS(init=[33,0,3,0])
+myfis = GFS(init=[3,0,2,0],inRange=[-0.5,1.5],outRange=[-0.5,1.5])
 myfis.keep_rules = False
 
 #sim1(myfis.randomize())
@@ -141,9 +141,9 @@ myga.addFitness(fitness1)
 best = myga.evalGA()
 
 
-x = np.linspace(-10,10,1000)
+x = np.linspace(0,1,1000)
 #ya = fn1(x)
-ya = map(fn2,x)
+ya = map(fn0,x)
 yf = map(best.evalfis,x)
 #yf = [myfis.evalfis(xx) for xx in x]
 

@@ -249,12 +249,12 @@ class GFS(FIS):
                         self.output[-1].addmf('%s%d'%(let[j],i),self._mfList[mf])
                     except ParamError as e:
                         print("ParamError: {0}".format(e))
-#            if rule_options:
-                self.rule_options = rule_options
-#            if rule_selection:
-                self.rule_selection = rule_selection
-                if not hasattr(self,'rule_options'):
-                    print('You need to supply rule_options for me')
+##            if rule_options:
+#                self.rule_options = rule_options
+##            if rule_selection:
+#                self.rule_selection = rule_selection
+#                if not hasattr(self,'rule_options'):
+#                    print('You need to supply rule_options for me')
             if rules:
                 self.addrule(rules)
             elif rule_selection is not None and rule_options:
@@ -374,9 +374,9 @@ class GFS(FIS):
                        sorted((random.uniform(*var.range) for p in mf.params))]
         if self.keep_rules:
             return self.replicate(out)
-        if self.rule_options is None:
+        if not hasattr(self,'rule_options'):
             self.randRules()
-        elif self.rule_num_poss is None:
+        elif not hasattr(self,'rule_num_poss'):
             self.randRules(False)
         rule_selects = random.sample(xrange(self.rule_num_poss),self.rule_num)
         rule_selection = 0;
