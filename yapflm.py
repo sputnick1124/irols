@@ -8,12 +8,19 @@ from __future__ import division , print_function
 import numpy as np
   
 class FIS(object):
-    comboper =  {'max'      :   np.max,
-                 'min'      :   np.min}
+#    comboper =  {'max'      :   np.max,
+#                 'min'      :   np.min}
+#                 
+#    oper =      {'max'      :   np.maximum,
+#                 'min'      :   np.minimum,
+#                 'sum'      :   np.sum,
+#                 'prod'     :   np.prod}
+    comboper =  {'max'      :   max,
+                 'min'      :   min}
                  
-    oper =      {'max'      :   np.maximum,
-                 'min'      :   np.minimum,
-                 'sum'      :   np.sum,
+    oper =      {'max'      :   max,
+                 'min'      :   min,
+                 'sum'      :   sum,
                  'prod'     :   np.prod}
                  
     def __init__(self,name='',fistype='mamdani',andMethod='min',orMethod='max',
@@ -128,7 +135,7 @@ class FIS(object):
         aggMethod = self.comboper[self.aggMethod]
         defuzzMethod = self.defuzz[self.defuzzMethod]
         comb = [andMethod,orMethod]
-        self.output_x = [np.linspace(*out.range,num=self._points) for out in self.output]
+#        self.output_x = [np.linspace(*out.range,num=self._points) for out in self.output]
         for rule in self.rule:
             ruleout.append([])
             ant = rule.antecedent
@@ -196,7 +203,6 @@ class MF(object):
     def __init__(self,mfname,mftype,mfparams,parent=None):
         self.name = mfname
         self.type = mftype
-        print (parent.vartype)
         if parent.vartype == 1:
             mfdict = {'trimf'           :   (InputTriMF,3)}
         elif parent.vartype == 0:
@@ -282,7 +288,7 @@ class InputTriMF(TriMF):
                     (lambda x: (self.m2 * x) + self.b2) if self.m2 else None]
     
     def __call__(self,x):
-        return self.fns[x > self.x_star](x)
+        return self.fns[x >= self.x_star](x)
     
 class OutputTriMF(TriMF):
     def __init__(self,*args,**kwargs):
@@ -435,7 +441,7 @@ def defuzzWeightedMV(outs):
     ht, hmv = 0, 0
     for y in outs:
         ht += y[1][1]
-        hmv += (y[2][0] - y[1][0]) / 2
+        hmv += y[1][1] * (y[2][0] + y[1][0]) / 2
     return hmv / ht
 
 class Error(Exception):
