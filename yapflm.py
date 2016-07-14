@@ -17,8 +17,9 @@ class FIS(object):
                  'prod'     :   np.prod}
                  
     def __init__(self,name='',fistype='mamdani',andMethod='min',orMethod='max',
-                  impMethod='min',aggMethod='max',defuzzMethod='centroid'):
-        self.defuzz =    {'centroid' :   defuzzCentroid} 
+                  impMethod='min',aggMethod='max',defuzzMethod='weightedMV'):
+        self.defuzz =    {'centroid' :   defuzzCentroid,
+                          'weightedMV':  defuzzWeightedMV} 
         self.input,self.output = [],[]
         self.name = name
         self.type = fistype
@@ -134,18 +135,19 @@ class FIS(object):
             con = rule.consequent
             weight = rule.weight
             conn = rule.connection
-            mfout = [self.input[i].mf[a].evalmf(x[i]) 
+            mfresult = [self.input[i].mf[a].evalmf(x[i]) 
                                     for i,a in enumerate(ant) if a is not None]
             # Generalize for multiple output systems. Easy
+            rulestrength = weight*comb[conn](mfresult)
             for out in xrange(numout):
-                outset = self.output[out].mf[con[out]].evalmf(self.output_x[out])
-                rulestrength = weight*comb[conn](mfout)
-                ruleout[-1].append(impMethod(rulestrength,outset))
+                outmf = self.output[out].mf[con[out]].evalmf(rulestrength)
+                ruleout[-1].append(outmf)
         for o in xrange(numout):
 #            ruletemp = [r[o] for r in ruleout]
 #            agg = [aggMethod([y[i] for y in ruletemp]) for i in xrange(len(ruletemp[0]))]
-            agg = aggMethod(ruleout,axis=0)
-            outputs.append(defuzzMethod(agg,self.output[o].range,self.output_x[o]))
+#            agg = aggMethod(ruleout,axis=0)
+            outs = [y[o] for y in ruleout]
+            outputs.append(defuzzMethod(outs))
         return outputs if len(outputs)>1 else outputs[0]
 
 class FuzzyVar(object):
@@ -194,17 +196,12 @@ class MF(object):
     def __init__(self,mfname,mftype,mfparams,parent=None):
         self.name = mfname
         self.type = mftype
+        print (parent.vartype)
+        if parent.vartype == 1:
+            mfdict = {'trimf'           :   (InputTriMF,3)}
+        elif parent.vartype == 0:
+            mfdict = {'trimf'           :   (OutputTriMF,3)}
 
-        mfdict = {'trimf'           :   (mfTriangle,3),
-                  'trapmf'          :   (mfTrapezoid,4),
-                  'trunctrilumf'    :   (mfTruncTriLeftUpper,4),
-                  'trunctrillmf'    :   (mfTruncTriLeftLower,4),
-                  'trunctrirumf'    :   (mfTruncTriRightUpper,4),
-                  'trunctrirlmf'    :   (mfTruncTriRightLower,4),
-                  'gaussmf'         :   (mfGaussian,2),
-                  'gauss2mf'        :   (mfGaussian2,2)}
-
-        self.mf = mfdict[self.type][0]
         if mfparams is not None:
             self.params = mfparams
         elif parent is not None:
@@ -216,13 +213,8 @@ class MF(object):
             self.params = [0]*mfdict[self.type][1]
         if not mfdict[self.type][1] == len(self.params):
             #Throw invalid param number exception
-#            raise(Exception)
-            pass
-        try:
-            self.mf(None,self.params)
-#            self.params = mfparams
-        except ParamError as e:
-            raise e
+            raise ParamError(params,'len({}) != %d'.format(params,mfdict[self.type][1]))
+        self.mf = mfdict[self.type][0](mfparams)
         
     def __str__(self,indent=''):
         mf_atts = ['name','type','params']
@@ -239,7 +231,7 @@ class MF(object):
         return local_dict == other_dict
 
     def evalmf(self,x):
-        return self.mf(x,self.params)
+        return self.mf(x)
         
 class Rule(object):
     def __init__(self,antecedent,consequent,weight,connection):
@@ -261,30 +253,52 @@ class Rule(object):
     def __eq__(self,other):
         return self.__dict__ == other.__dict__
 
-def mfTriangle(x,params):
-    a,b,c = params
-    check = [a==b,b==c]
-    if x is None:
-        err = [b<a,c<b]
+class TriMF(object):
+    def __init__(self,params):
+        a,x_star,b = params
+        err = [x_star < a, x_star > b]
         if any(err):
             #Throw an invalid param exception
-            errs = ['b<a', 'c<b']
+            errs = ['b<a','c<b']
             e = [errs[i] for i,_ in enumerate(err) if _]
             raise ParamError(params,'Invalid params {}: {}'.format(e,params))
+        if a != x_star:
+            self.m1 = 1 / (x_star - a)
+            self.b1 = -self.m1 * a
         else:
-            return 0 #Everything looks good
-    flag = (type(x) is np.ndarray)
-    if check[0]:
-        retval = (c-x)/(c-b)
-    elif check[1]:
-        retval = (x-a)/(b-a)
-    else:
-        retval = np.minimum((x-a)/(b-a),(c-x)/(c-b))
-    if flag:
-        retval[np.bitwise_or(x<a,x>c)] = 0
-    return retval
+            self.m1, self.b1 = None, None
+        if b != x_star:
+            self.m2 = -1 / (b - x_star)
+            self.b2 = 1 - (self.m2 * x_star)
+        else:
+            self.m2, self.b2 = None, None
+        self.a, self.b = a, b
+        self.x_star = x_star
+
+class InputTriMF(TriMF):
+    def __init__(self,*args,**kwargs):
+        super(InputTriMF,self).__init__(*args,**kwargs)
+        self.fns = [(lambda x: (self.m1 * x) + self.b1) if self.m1 else None,
+                    (lambda x: (self.m2 * x) + self.b2) if self.m2 else None]
     
-        
+    def __call__(self,x):
+        return self.fns[x > self.x_star](x)
+    
+class OutputTriMF(TriMF):
+    def __init__(self,*args,**kwargs):
+        super(OutputTriMF,self).__init__(*args,**kwargs)
+        self.fns = [(lambda y: (y - self.b1) / self.m1) if self.m1 else None,
+                    (lambda y: (y - self.b2) / self.m2) if self.m2 else None]
+    
+    def __call__(self,y):
+        start =  (self.a, 0)
+        end   =  (self.b, 0)
+        trunc1 = ((self.fns[0](y), y) if self.fns[0] else (self.a, y))
+        trunc2 = ((self.fns[1](y), y) if self.fns[1] else (self.b, y))
+        return [start, trunc1, trunc2, end]
+
+
+
 def mfTrapezoid(x,params):
     a,b,c,d = params
     check = [a==b,b==c,c==d]
@@ -406,14 +420,23 @@ def mfGaussian(x,params):
 def mfGaussian2():
     pass
 
-def defuzzCentroid(agg, outrange, outx):
-    a, b = outrange
-    totarea = np.sum(agg)
-    if totarea == 0:
-        print('Total area was zero. Using average of the range instead')
-        return (a + b) / 2
-    totmom = np.sum(agg[0] * outx)
-    return totmom / totarea
+def defuzzCentroid(outs):
+#    TODO: Make this work with new outmf structure
+#    a, b = outrange
+#    totarea = np.sum(agg)
+#    if totarea == 0:
+#        print('Total area was zero. Using average of the range instead')
+#        return (a + b) / 2
+#    totmom = np.sum(agg[0] * outx)
+#    return totmom / totarea
+    pass
+
+def defuzzWeightedMV(outs):
+    ht, hmv = 0, 0
+    for y in outs:
+        ht += y[1][1]
+        hmv += (y[2][0] - y[1][0]) / 2
+    return hmv / ht
 
 class Error(Exception):
     pass

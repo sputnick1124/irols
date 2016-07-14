@@ -39,6 +39,7 @@ fis_list = sorted([f for f in os.listdir(os.getcwd()) if 'opt.fis' in f])
 
 fisparser = FISParser(fis_list[fis_index])
 fis = fisparser.fis
+fis.defuzzMethod = 'weightedMV'
 #myfisparser = FISParser('fuzzy_crt_opt.fis')
 #myfis = myfisparser.fis
 #print(fis)
