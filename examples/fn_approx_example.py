@@ -35,7 +35,7 @@ fns = [fn1,fn2,fn3]
 #rules = [[0,0,1,1],[1,1,1,1],[2,1,1,1]]
 #myfis.addrule(rules)
 
-fis_list = [f for f in os.listdir(os.getcwd()) if 'opt.fis' in f]
+fis_list = sorted([f for f in os.listdir(os.getcwd()) if 'opt.fis' in f])
 
 fisparser = FISParser(fis_list[fis_index])
 fis = fisparser.fis
@@ -51,14 +51,14 @@ xs = [np.linspace(0,1,100000),
 #ya = list(map(lambda x: x**(0.45), x))
 #yf = [myfis.evalfis(xx) for xx in x]
 x = xs[fis_index]
-#ya = fns[fis_index](x)
+ya = fns[fis_index](x)
 yf = [fis.evalfis(xx) for xx in x]
 
 #labels = ['x^0.45',
 #          '       {-0.8 if x<=-0.8\nx = {x\n       {0.8 if x>=0.8',
 #          'x^2']
 ## Plot results
-#import matplotlib.pyplot as plt
-#plt.plot(x,ya,'b',x,yf,'g--')
-#plt.legend([labels[fis_index],"Fuzzy Approx"],loc='best')
-#plt.show()
+import matplotlib.pyplot as plt
+plt.plot(x,ya,'b',x,yf,'g--')
+plt.legend([labels[fis_index],"Fuzzy Approx"],loc='best')
+plt.show()
