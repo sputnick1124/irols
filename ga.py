@@ -66,7 +66,7 @@ class GA(object):
         if not any(hasattr(system,x) for x in ['encode','replicate','randomize']):
             return
         self.system = system
-        self.ranges = system.getRanges()
+        self.mf_types = system.getTypes()
         self.initPop()
         
     def evalGA(self):
@@ -131,11 +131,10 @@ class GA(object):
         child,param_num = [],0
         if debug:
             stuff = []
-        for group in sum(self.ranges,[]):
-            for i,param_lim in enumerate(group):
-                ak,bk = param_lim
-                alpha = abs((xMax[param_num]-xMin[param_num])/(bk-ak))
-                I = min(xMin[param_num] - ak,bk - xMax[param_num])
+        for num_mf_params in sum(self.mf_types,[]):
+            for i in xrange(num_mf_params):
+                alpha = abs(xMax[param_num]-xMin[param_num])
+                I = min(xMin[param_num], 1 - xMax[param_num])
                 low = xMin[param_num] - I*alpha
                 if debug:
                     stuff.append(
@@ -177,18 +176,20 @@ class GA(object):
         coin_flips = [random.randint(0,1) for gen in xrange(num_genomes)]
         lambdas = [random.random() for i in xrange(num_genomes)]
         mut = child.encode()
+        if not len(mut)%3 == 1:
+            print("something's wrong")
         mut_genomes = random.sample(xrange(len(mut)),num_genomes)
         param_num = 0
         ranges = []
-        for group in sum(self.ranges,[]):
-            for i,param_lim in enumerate(group):
+        for num_mf_params in sum(self.mf_types,[]):
+            for i in xrange(num_mf_params):
                 if i == 0:
                     if len(mut)-1 == param_num:
-                        ranges.append(param_lim)
+                        ranges.append((0,1))
                     else:
-                        ranges.append((param_lim[0],mut[param_num+1]))
-                elif i == len(group)-1:
-                    ranges.append((mut[param_num-1],param_lim[1]))
+                        ranges.append((0,mut[param_num+1]))
+                elif i == 2:
+                    ranges.append((mut[param_num-1],1))
                 else:
                     ranges.append((mut[param_num-1],mut[param_num+1]))
                 param_num += 1
@@ -201,54 +202,59 @@ class GA(object):
                         mut[genome] ^= (1<<random.randint(0,self.system.rule_num_poss-1))
 #                    print('mut',mut[genome])
                 break
+            if genome%3 == 0:
+                interval = [0,mut[genome + 1]]
+            elif genome%3 == 1:
+                interval = [mut[genome-1],mut[genome+1]]
+            else:
+                interval = [mut[genome-1],1]
             if flip:
                 mut[genome] = ranges[genome][0] +\
-                                (mut[genome]-ranges[genome][0]) *\
+                                (mut[genome]-interval[0]) *\
                                 (1 - lamb*(1 - self.cur_gen/self.genMax)**b)
             else:
                 mut[genome] = mut[genome] +\
-                                (ranges[genome][1] - mut[genome]) *\
+                                (interval[1] - mut[genome]) *\
                                 (1 - lamb*(1 - self.cur_gen/self.genMax)**b)
         return self.system.replicate(mut)
 
 class GFS(FIS):
-    def __init__(self,init=None,inRange=None,outRange=None,
-                  rules=None,rule_options=None,rule_selection=None,**fis_kwargs):
+    def __init__(self,init=None,rules=None,rule_options=None,
+                 rule_selection=None,encoded=None,**fis_kwargs):
         super(GFS,self).__init__(**fis_kwargs)
-        self._mfList = ['trimf','trapmf']
+        self._mfList = ['trimf']
         if init is not None:
-            self.init = [None]*4
-            if inRange is None or outRange is None:
-                r = (0,1)
-                inRange, outRange = cycle([r]),cycle([r])
-#                print("No range specified. Defaulting to [-1,1]")
-            else:
-                if hasattr(inRange[0],'__iter__'):
-                    inRange = cycle(inRange)
-                else:
-                    inRange = cycle([inRange])
-                if hasattr(outRange[0],'__iter__'):
-                    outRange = cycle(outRange)
-                else:
-                    outRange = cycle([outRange])
+            self.init = [None]*2
             self.numInMFs = bitmaskarray(init[0],10)
-            typeInMFs = bitmaskarray(init[1],512,len(self.numInMFs))
-            for i,(inp,m) in enumerate(zip(self.numInMFs,typeInMFs)):
-                self.addvar('input','input%d'%i,inRange.next())
-                for j,mf in enumerate(bitmaskarray(m,2,inp)):
-                    try:
-                        self.input[-1].addmf('%s%d'%(let[j],i),self._mfList[mf])
-                    except ParamError as e:
-                        print("ParamError: {0}".format(e))
-            self.numOutMFs = bitmaskarray(init[2],10)
-            typeOutMFs = bitmaskarray(init[3],512,len(self.numOutMFs))
-            for i,(outp,m) in enumerate(zip(self.numOutMFs,typeOutMFs)):
-                self.addvar('output','output%d'%i,outRange.next())
-                for j,mf in enumerate(bitmaskarray(m,2,outp)):
-                    try:
-                        self.output[-1].addmf('%s%d'%(let[j],i),self._mfList[mf])
-                    except ParamError as e:
-                        print("ParamError: {0}".format(e))
+            for i,inp in enumerate(self.numInMFs):
+                self.addvar('input','input%d'%i)
+                try:
+                    if encoded:
+                        params = []
+                        if not type(encoded) is deque:
+                            encoded = deque(encoded)
+                        [params.append(encoded.popleft()) for i in xrange(3)]
+#                        print(params)
+                    else:
+                        params = None
+#                        print(params)
+                    for j in xrange(inp):
+                        self.input[-1].addmf('%s%d'%(let[j],i),params)
+                except ParamError as e:
+                    print("ParamError: {0}".format(e))
+            self.numOutMFs = bitmaskarray(init[1],10)
+            for i,outp in enumerate(self.numOutMFs):
+                self.addvar('output','output%d'%i)
+                try:
+                    if encoded:
+                        params = []
+                        [params.append(encoded.popleft()) for i in xrange(3)]
+                    else:
+                        params = None
+                    for j in xrange(outp):
+                        self.output[-1].addmf('%s%d'%(let[j],i),params)
+                except ParamError as e:
+                    print("ParamError: {0}".format(e))
 ##            if rule_options:
 #                self.rule_options = rule_options
 ##            if rule_selection:
@@ -267,28 +273,26 @@ class GFS(FIS):
             else:
                 print('no rules added')
         else:
-            self.init = [None]*4
+            self.init = [None]*2
         self.numParams = self.decode(None)
         self.keep_rules = True
 
-    def addvar(self,vartype,varname,varrange):
+    def addvar(self,vartype,varname):
         if vartype in 'input':
             if self.init[0] is None:
-                self.init[:2] = [0,0]
+                self.init[0] = 0
             else:
                 self.init[0] *= 10
-                self.init[1] *= 512
-            self.input.append(GenFuzzyVar(varname,varrange,self,1))
+            self.input.append(GenFuzzyVar(varname,self,1))
             if len(self.rule) > 0:
                 for rule in self.rule:
                     rule.antecedent += [0]
         elif vartype in 'output':
-            if self.init[2] is None:
-                self.init[2:] = [0,0]
+            if self.init[1] is None:
+                self.init[1] = 0
             else:
-                self.init[2] *= 10
-                self.init[3] *= 512
-            self.output.append(GenFuzzyVar(varname,varrange,self,0))
+                self.init[1] *= 10
+            self.output.append(GenFuzzyVar(varname,self,0))
             if len(self.rule) > 0:
                 for rule in self.rule:
                     rule.consequent += [0]
@@ -309,33 +313,24 @@ class GFS(FIS):
         return self.init
         
     def replicate(self,encoded=None,rule_selection=None):
-        inRanges = [inp.range for inp in self.input]
-        outRanges = [outp.range for outp in self.output]
+        chromosome = encoded if encoded else self.encode()
         if self.keep_rules:
             rules = tuple(r.encode() for r in self.rule)
-            retFIS = GFS(init=self.init,inRange=inRanges,outRange=outRanges,
+            retFIS = GFS(init=self.init,encoded=chromosome,
                          rules=rules)
         elif rule_selection:
-            retFIS = GFS(init=self.init,inRange=inRanges,outRange=outRanges,
-                         rule_options=self.rule_options,
+            retFIS = GFS(init=self.init,
+                         rule_options=self.rule_options,encoded=chromosome,
                          rule_selection=rule_selection)
         elif encoded and len(encoded) == self.numParams+1:
 #            print(encoded[-1])
             rule_selection = encoded.pop()
-            inRanges = [var.range for var in self.input]
-            outRanges = [var.range for var in self.output]
-            retFIS = GFS(init=self.init,inRange=inRanges,outRange=outRanges,
-                     rule_options=self.rule_options,rule_selection=rule_selection)
-            retFIS.decode(encoded)
+            retFIS = GFS(init=self.init,rule_options=self.rule_options,
+                         encoded=chromosome,rule_selection=rule_selection)
             return retFIS
         else:
             rules = tuple(r.encode() for r in self.rule)
-            retFIS = GFS(init=self.init,inRange=inRanges,outRange=outRanges,
-                         rules=rules)
-        if encoded:
-            retFIS.decode(encoded)
-        else:
-            retFIS.decode(self.encode())
+            retFIS = GFS(init=self.init,rules=rules,encoded=chromosome)
         return retFIS #,self.check()
 
     def encode(self,rule=True):
@@ -371,7 +366,7 @@ class GFS(FIS):
         for var in self.input + self.output:
             for mf in var.mf:
                 [out.append(x) for x in 
-                       sorted((random.uniform(*var.range) for p in mf.params))]
+                       sorted((random.uniform(0,1) for p in mf.params))]
         if self.keep_rules:
             return self.replicate(out)
         if not hasattr(self,'rule_options'):
@@ -420,7 +415,7 @@ class GFS(FIS):
 
     def randRules(self,gen_rules=True):
         self.numInMFs = bitmaskarray(self.init[0],10)
-        self.numOutMFs = bitmaskarray(self.init[2],10)
+        self.numOutMFs = bitmaskarray(self.init[1],10)
         if gen_rules:
             self.rule_options = self.ruleGen(self.numInMFs + self.numOutMFs)
             rule_selects = [self.rule_options.index(r.antecedent+r.consequent) for r in self.rule]
@@ -428,21 +423,20 @@ class GFS(FIS):
         self.rule_num = prod(self.numInMFs)
         self.rule_num_poss = prod(self.numInMFs + self.numOutMFs)
     
-    def getRanges(self):
-        ranges = []
+    def getTypes(self):
+        mf_types = []
         for var in self.input+self.output:
-            ranges.append([tuple(var.range for p in mf.params) for mf in var.mf])
+            mf_types.append([len(mf.params) for mf in var.mf])
         if hasattr(self,'rule_num_poss'):
-            ranges.append([([0,(1<<self.rule_num_poss)-1],)])
-        return ranges
+            mf_types.append([([0,(1<<self.rule_num_poss)-1],)])
+        return mf_types
 
 class GenFuzzyVar(FuzzyVar):
-    def addmf(self,mfname,mftype,mfparams=None):
+    def addmf(self,mfname,mfparams=None):
         try:
-            mf = MF(mfname,mftype,mfparams,self)
+            mf = MF(mfname,mfparams,self)
         except ParamError as e:
             raise e
-        mf.range = self.range
         mftypes = {'trimf':0, 'trapmf':1}
         self.mf.append(mf)
         if self.vartype is None:
@@ -450,19 +444,7 @@ class GenFuzzyVar(FuzzyVar):
         elif self.vartype:
             numIn = len(self.parent.input)
             self.parent.init[0] += 10**(numIn - self.num - 1)
-            
-            typeMFs = bitmaskarray(self.parent.init[1])
-            if len(typeMFs) <= numIn:
-                typeMFs = [0]*(numIn-len(typeMFs)) + typeMFs
-            typeMFs[self.num] = (typeMFs[self.num]<<1) + mftypes[mftype]
-            self.parent.init[1] = storebits(typeMFs)
         else:
             numOut = len(self.parent.output)
-            self.parent.init[2] += 10**(numOut - self.num - 1)
+            self.parent.init[1] += 10**(numOut - self.num - 1)
             
-            typeMFs = bitmaskarray(self.parent.init[3])
-            if len(typeMFs) <= numOut:
-                typeMFs = [0]*(numOut-len(typeMFs)) + typeMFs
-            typeMFs[self.num] = (typeMFs[self.num]<<1) + mftypes[mftype]
-            self.parent.init[3] = storebits(typeMFs)
-        

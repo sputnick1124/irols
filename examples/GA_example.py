@@ -124,12 +124,12 @@ ic = [0.2,0]
 
 #myfis = GFS(init=[5,(1<<4)+(1<<0),3,0],inRange=[-13,13],outRange=[-5,120])
 #myfis._points = 1001
-myfis = GFS(init=[3,0,2,0])
+myfis = GFS(init=[3,2])
 myfis.keep_rules = False
 
 #sim1(myfis.randomize())
 
-myga = GA(stagnation=None)
+myga = GA()
 myga.addSystem(myfis)
 #p = Pool(4)
 #results = p.map_async(sim1,myga.populations[0])

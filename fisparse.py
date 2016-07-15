@@ -36,7 +36,8 @@ class FISParser:
         fisvar = {f['arg'].lower():f['val'].strip("'") for f in fisargs}
         varrange = parse('[{:g}{:g}]',fisvar['range']).fixed
         varname = fisvar['name']
-        self.fis.addvar(vartype,varname,varrange)
+        normrange = 
+        self.fis.addvar(vartype,varname)
         for mf in range(int(fisvar['nummfs'])):
             mfargs = parse("{name}':'{type}',[{range}]",fisvar['mf%d'%(mf+1)])
 #                print(varnum)
