@@ -36,7 +36,6 @@ class FIS(object):
         self.aggMethod = aggMethod
         self.defuzzMethod = defuzzMethod
         self.rule = []
-        self._points = 101
 
     def __str__(self):
         sys_atts = ['name','type','andMethod','orMethod',
@@ -216,11 +215,12 @@ class MF(object):
             dr = r/(p-1)
             self.params = [parent.range[0]+i*dr for i in xrange(p)]
         else:
+            print('I am zeroing my params')
             self.params = [0]*mfdict[self.type][1]
         if not mfdict[self.type][1] == len(self.params):
             #Throw invalid param number exception
             raise ParamError(params,'len({}) != %d'.format(params,mfdict[self.type][1]))
-        self.mf = mfdict[self.type][0](mfparams)
+        self.mf = mfdict[self.type][0](self.params)
         
     def __str__(self,indent=''):
         mf_atts = ['name','type','params']
@@ -284,25 +284,37 @@ class TriMF(object):
 class InputTriMF(TriMF):
     def __init__(self,*args,**kwargs):
         super(InputTriMF,self).__init__(*args,**kwargs)
-        self.fns = [(lambda x: (self.m1 * x) + self.b1) if self.m1 else None,
-                    (lambda x: (self.m2 * x) + self.b2) if self.m2 else None]
+        self.eval_args = [(self.m1, self.b1), (self.m2, self.b2)]
+        self.fn = infn
+#        self.fns = [(lambda x: (self.m1 * x) + self.b1) if self.m1 else None,
+#                    (lambda x: (self.m2 * x) + self.b2) if self.m2 else None]
     
     def __call__(self,x):
-        return self.fns[x >= self.x_star](x)
+        return self.fn(x,*self.eval_args[x >= self.x_star])
     
 class OutputTriMF(TriMF):
     def __init__(self,*args,**kwargs):
         super(OutputTriMF,self).__init__(*args,**kwargs)
-        self.fns = [(lambda y: (y - self.b1) / self.m1) if self.m1 else None,
-                    (lambda y: (y - self.b2) / self.m2) if self.m2 else None]
+        self.fn = outfn
+#        self.fns = [(lambda y: (y - self.b1) / self.m1) if self.m1 else None,
+#                    (lambda y: (y - self.b2) / self.m2) if self.m2 else None]
     
     def __call__(self,y):
         start =  (self.a, 0)
         end   =  (self.b, 0)
-        trunc1 = ((self.fns[0](y), y) if self.fns[0] else (self.a, y))
-        trunc2 = ((self.fns[1](y), y) if self.fns[1] else (self.b, y))
+        truncval1 = self.fn(y, self.m1, self.b1)
+        truncval2 = self.fn(y, self.m2, self.b2)
+        trunc1 = ((truncval1, y) if truncval1 else (self.a, y))
+        trunc2 = ((truncval2, y) if truncval2 else (self.b, y))
         return [start, trunc1, trunc2, end]
 
+def infn(x,m,b):
+    y = ((m * x) + b) if m else None #y
+    return y if y >= 0 else 0
+
+def outfn(y,m,b):
+    x = ((y - b) / m) if m else None #x
+    return x if x >= 0 else 0
 
 
 def mfTrapezoid(x,params):

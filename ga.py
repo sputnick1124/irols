@@ -219,7 +219,7 @@ class GFS(FIS):
         if init is not None:
             self.init = [None]*4
             if inRange is None or outRange is None:
-                r = (-1,1)
+                r = (0,1)
                 inRange, outRange = cycle([r]),cycle([r])
 #                print("No range specified. Defaulting to [-1,1]")
             else:

@@ -44,7 +44,7 @@ fis.defuzzMethod = 'weightedMV'
 #myfis = myfisparser.fis
 #print(fis)
 
-xs = [np.linspace(0,1,10),
+xs = [np.linspace(0,1,100),
       np.linspace(-1,1,1000),
       np.linspace(-10,10,1000)]
 #dx = 0.001
