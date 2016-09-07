@@ -163,3 +163,7 @@ install(DIRECTORY  scripts launch
 
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
+
+add_executable(offboard src/offboard.cpp)
+target_link_libraries(offboard ${catkin_LIBRARIES})
+#add_dependencies(offboard te_messages_cpp)

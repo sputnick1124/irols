@@ -16,6 +16,7 @@ class image_converter:
 #    self.image_pub = rospy.Publisher("image_topic",Image,queue_size = 10)
     #Get CvBridge object ready. This will do the conversion cv2->ROS
     self.image_sub = rospy.Subscriber("/camera1/image_raw",Image,self.recv)
+#    self.image_sub = rospy.Subscriber("/tracker/image",Image,self.recv)
     self.bridge = CvBridge()
     #Start our videocapture device
 
