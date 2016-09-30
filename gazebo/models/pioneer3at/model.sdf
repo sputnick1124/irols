@@ -54,16 +54,16 @@
         </geometry>
         <surface>
           <friction>
-            <!--ode>
-              <mu>0.5</mu>
-              <mu2>0.1</mu2>
-              <slip1>0.1</slip1>
-              <slip2>0.1</slip2>
-            </ode-->
-            <bullet>
+            <ode>
+              <mu>1000000</mu>
+              <mu2>100</mu2>
+              <slip1>0</slip1>
+              <slip2>0</slip2>
+            <ode>
+            <!--bullet>
               <friction>1.6</friction>
               <friction2>0.5</friction2>
-            </bullet>
+            </bullet-->
           </friction>
         </surface>
       </collision>
@@ -99,17 +99,16 @@
         </geometry>
         <surface>
           <friction>
-            <!--ode>
-              <mu>0.5</mu>
-              <mu2>0.1</mu2>
-              <slip1>0.1</slip1>
-              <slip2>0.1</slip2>
-            </ode-->
-            <bullet>
+            <ode>
+              <mu>1000000</mu>
+              <mu2>100</mu2>
+              <slip1>0</slip1>
+              <slip2>0</slip2>
+            <ode>
+            <!--bullet>
               <friction>1.6</friction>
               <friction2>0.5</friction2>
-            </bullet>
-
+            </bullet-->
           </friction>
         </surface>
       </collision>
@@ -145,17 +144,16 @@
         </geometry>
         <surface>
           <friction>
-            <!--ode>
-              <mu>0.5</mu>
-              <mu2>0.1</mu2>
-              <slip1>0.1</slip1>
-              <slip2>0.1</slip2>
-            </ode-->
-            <bullet>
+            <ode>
+              <mu>1000000</mu>
+              <mu2>100</mu2>
+              <slip1>0</slip1>
+              <slip2>0</slip2>
+            <ode>
+            <!--bullet>
               <friction>1.6</friction>
               <friction2>0.5</friction2>
-            </bullet>
-
+            </bullet-->
           </friction>
         </surface>
       </collision>
@@ -191,17 +189,16 @@
         </geometry>
         <surface>
           <friction>
-            <!--ode>
-              <mu>0.5</mu>
-              <mu2>0.1</mu2>
-              <slip1>0.1</slip1>
-              <slip2>0.1</slip2>
-            </ode-->
-            <bullet>
+            <ode>
+              <mu>1000000</mu>
+              <mu2>100</mu2>
+              <slip1>0</slip1>
+              <slip2>0</slip2>
+            <ode>
+            <!--bullet>
               <friction>1.6</friction>
               <friction2>0.5</friction2>
-            </bullet>
-
+            </bullet-->
           </friction>
         </surface>
       </collision>
