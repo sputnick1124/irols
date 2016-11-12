@@ -2,6 +2,7 @@
 import rospy
 from mavros_msgs.msg import State
 from mavros_msgs.srv import CommandBool, SetMode
+from std_msgs.msg import Bool
 from geometry_msgs.msg import PoseStamped, TwistStamped
 from sensor_msgs.msg import Imu
 from nav_msgs.msg import Odometry
@@ -11,10 +12,15 @@ class LEZL:
 		rospy.init_node('lezl')
 		self.state_sub = rospy.Subscriber('/mavros/state',State,self.state_cb)
 		self.odom_sub = rospy.Subscriber('/p3at/odom',Odometry,self.odom_cb)
+		self.tracked_sub = rospy.Subscriber('/tracker/tracked',Bool,self.track_cb)
+		self.heading_sub = rospy.Subscriber('/tracker/heading',TwistStamped,self.head_cb)
 		local_pos_pub = rospy.Publisher('/mavros/setpoint_position/local',PoseStamped,queue_size=10)
+		local_vel_pub = rospy.Publisher('/mavros/setpoint_velocity/cmd_vel',TwistStamped,queue_size=10)
 		self.arming_client = rospy.ServiceProxy('/mavros/cmd/arming',CommandBool)
 		self.set_mode_client = rospy.ServiceProxy('/mavros/set_mode',SetMode)
 		self.state = State()
+		self.tracked = False
+		self.heading = TwistStamped()
 		rate = rospy.Rate(20)
 		while self.state.connected:
 			rospy.spinOnce()
@@ -43,8 +49,20 @@ class LEZL:
 				print "Watching for landing"
 				self.watchdog(start)
 			self.pose.header.stamp = rospy.Time.now()
-			local_pos_pub.publish(self.pose)
+			if not self.tracked:
+				local_pos_pub.publish(self.pose)
+			else:
+				local_vel_pub.publish(self.heading)
 			rate.sleep()
+			
+	def track_cb(self,data):
+		self.tracked = data.data
+	
+	def head_cb(self,data):
+		self.heading = data
+		self.heading.twist.linear.x *= 0.125
+		self.heading.twist.linear.y *= 0.125
+		self.heading.twist.linear.z = 0
 
 	def state_cb(self,data):
 		self.state = data

@@ -6,7 +6,7 @@
     <arg name="log" default="false"/>
     <arg name="log_dir" default=""/>
     <arg name="ns" default="/"/>
-    <arg name="world" default="irols_cam"/>
+    <arg name="world" default="irols_lidar"/>
     <arg name="build" default="posix_sitl_default"/>
 
 echo $(find irols)/build_$(build)

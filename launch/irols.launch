@@ -1,5 +1,5 @@
 <launch>
 
-	<node pkg="irols" type="cv_bridge_stream_recv.py" name="cam_stream"/>
+	<!--node pkg="irols" type="cv_bridge_stream_recv.py" name="cam_stream"/-->
 
 </launch>

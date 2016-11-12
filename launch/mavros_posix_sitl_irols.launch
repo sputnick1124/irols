@@ -7,6 +7,7 @@
     <arg name="world" default="irols_cam"/>
     <arg name="build" default="posix_sitl_default"/>
     <arg name="fcu_url" default="udp://:14540@localhost:14557"/>
+    <arg name="gcs_url" default="udp://:14550@localhost:14555"/>
 
     <include file="$(find irols)/launch/posix_sitl_irols.launch">
         <arg name="headless" value="$(arg headless)"/>
