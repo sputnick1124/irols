@@ -52,6 +52,21 @@
         <cast_shadows>1</cast_shadows>
         <transparency>0</transparency>
       </visual>
+	<visual name='visual'>
+	        <pose frame=''>0 0 0.0025 0 0 0</pose>
+		<geometry>
+		<box>
+		<size>0.05 0.05 0.001</size>
+		</box>
+		</geometry>
+		<material>
+		<script>
+		<uri>model://landing_pad/materials/scripts</uri>
+		<uri>model://landing_pad/materials/textures</uri>
+		<name>at0/Diffuse</name>
+		</script>
+		</material>
+	</visual>
       <!--Apparently theres a bug with polyline and GTS with Gazebo6?
        ---The GTS library is found at compile time... but still no-->
       <!--visual name='h_visual'>

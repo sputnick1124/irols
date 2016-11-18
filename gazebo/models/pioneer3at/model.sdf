@@ -59,7 +59,7 @@
               <mu2>100</mu2>
               <slip1>1.5</slip1>
               <slip2>1.5</slip2>
-            <ode>
+            </ode>
             <!--bullet>
               <friction>1.6</friction>
               <friction2>0.5</friction2>
@@ -104,7 +104,7 @@
               <mu2>100</mu2>
               <slip1>1.5</slip1>
               <slip2>1.5</slip2>
-            <ode>
+            </ode>
             <!--bullet>
               <friction>1.6</friction>
               <friction2>0.5</friction2>
@@ -149,7 +149,7 @@
               <mu2>100</mu2>
               <slip1>1.5</slip1>
               <slip2>1.5</slip2>
-            <ode>
+            </ode>
             <!--bullet>
               <friction>1.6</friction>
               <friction2>0.5</friction2>
@@ -194,7 +194,7 @@
               <mu2>100</mu2>
               <slip1>1.5</slip1>
               <slip2>1.5</slip2>
-            <ode>
+            </ode>
             <!--bullet>
               <friction>1.6</friction>
               <friction2>0.5</friction2>
@@ -246,13 +246,30 @@
         <use_parent_model_frame>true</use_parent_model_frame>
       </axis>
     </joint>
-    <plugin name="SkidSteerDrivePlugin" filename="libSkidSteerDrivePlugin.so">
+    <!--plugin name="SkidSteerDrivePlugin" filename="libSkidSteerDrivePlugin.so">
       <right_front>right_front</right_front>
       <right_rear>right_rear</right_rear>
       <left_front>left_front</left_front>
       <left_rear>left_rear</left_rear>
-      <!--MaxForce>5.0</MaxForce-->
+      <MaxForce>5.0</MaxForce>
+    </plugin-->
+    <plugin name="skid_steer_drive_controller" filename="libgazebo_ros_skid_steer_drive.so">
+      <updateRate>1000.0</updateRate>
+      <robotNamespace>p3at</robotNamespace>
+      <leftFrontJoint>pioneer3at::left_front</leftFrontJoint>
+      <rightFrontJoint>pioneer3at::right_front</rightFrontJoint>
+      <leftRearJoint>pioneer3at::left_rear</leftRearJoint>
+      <rightRearJoint>pioneer3at::right_rear</rightRearJoint>
+      <wheelSeparation>0.4</wheelSeparation>
+      <wheelDiameter>0.215</wheelDiameter>
+      <robotBaseFrame>chassis</robotBaseFrame>
+      <torque>500</torque>
+      <commandTopic>cmd_vel</commandTopic>
+      <odometryTopic>odom</odometryTopic>
+      <odometryFrame>odom</odometryFrame>
+      <broadcastTF>false</broadcastTF>
     </plugin>
+
     <!--    
       <include>
         <uri>model://hokuyo</uri>

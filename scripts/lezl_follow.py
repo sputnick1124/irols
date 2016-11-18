@@ -10,6 +10,7 @@ from nav_msgs.msg import Odometry
 class LEZL:
 	def __init__(self):
 		rospy.init_node('lezl')
+		self.pose = PoseStamped()
 		self.state_sub = rospy.Subscriber('/mavros/state',State,self.state_cb)
 		self.odom_sub = rospy.Subscriber('/p3at/odom',Odometry,self.odom_cb)
 		self.tracked_sub = rospy.Subscriber('/tracker/tracked',Bool,self.track_cb)
@@ -26,14 +27,15 @@ class LEZL:
 			rospy.spinOnce()
 			rate.sleep()
 
-		self.pose = PoseStamped()
 		self.pose.pose.position.x = 0
 		self.pose.pose.position.y = 0
 		self.pose.pose.position.z = 10
 
 		wait = rospy.Time.now()
 		offb = True
+		print "Starting Mission"
 		while not rospy.is_shutdown():
+#			print (rospy.Time.now() - wait)>rospy.Duration(5)
 			if (self.state.mode != "OFFBOARD" and 
 				(rospy.Time.now() - wait) > rospy.Duration(5)):
 				print "Attempting to enter OFFBOARD"

@@ -6,7 +6,7 @@
 
 if [ "$#" -lt 1 ]
 then
-    SRC_DIR=/home/nick/ros_ws/src/irols
+    SRC_DIR=/home/uav_administrator/ros_ws/src/irols
 else
     SRC_DIR=$1
 fi

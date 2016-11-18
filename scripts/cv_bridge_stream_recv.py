@@ -50,7 +50,7 @@ class image_converter:
 	    vec_len = sqrt(heading[0]*heading[0] + heading[1]*heading[1])
 	    self.heading.twist.linear.x = heading[0]/vec_len
 	    self.heading.twist.linear.y = heading[1]/vec_len
-	    cv2.imshow('from_pi',mask)
+	    cv2.imshow('from_pi',im)
 	    cv2.waitKey(3)
     self.track_pub.publish(self.tracked)
     self.heading_pub.publish(self.heading)
