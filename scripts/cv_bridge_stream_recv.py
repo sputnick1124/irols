@@ -4,9 +4,11 @@ from __future__ import print_function, division
 import sys
 import rospy
 import cv2
+import tf
+import numpy as np
 from geometry_msgs.msg import TwistStamped
 from std_msgs.msg import String, Bool, Float32
-from sensor_msgs.msg import Image
+from sensor_msgs.msg import Image, CameraInfo
 from cv_bridge import CvBridge, CvBridgeError
 
 from math import sqrt
@@ -17,20 +19,42 @@ class image_converter:
     #Get our publisher ready
 #    self.image_pub = rospy.Publisher("image_topic",Image,queue_size = 10)
     #Get CvBridge object ready. This will do the conversion cv2->ROS
-    self.image_sub = rospy.Subscriber("/camera1/image_raw",Image,self.recv)
+    self.image_sub = rospy.Subscriber("/camera1/image_rect",Image,self.recv)
+#    self.landing_sub = rospy.Subscriber("/landing_pad/image_rect",Image,self.find_tag)
+    self.camera_info_sub = rospy.Subscriber("/camera1/camera_info",CameraInfo,self.get_cam_info)
     self.track_pub = rospy.Publisher("/tracker/tracked",Bool,queue_size=20)
     self.heading_pub = rospy.Publisher("tracker/heading",TwistStamped,queue_size=10)
+    self.landing_pub = rospy.Publisher("/landing_pad/image_rect",Image,queue_size=20)
+    self.listener = tf.TransformListener()
 #    self.image_sub = rospy.Subscriber("/tracker/image",Image,self.recv)
     self.bridge = CvBridge()
     self.tracked = Bool()
     self.tracked.data = False
     self.heading = TwistStamped()
+#    self.cam_info = CameraInfo()
     #Start our videocapture device
+
+  def get_cam_info(self,data):
+    #Take image date from cv2, convert it, and send it out to ROS
+#    self.cam_info = data
+    width = data.width
+    self.fy = data.K[0] # pixel scaled focal length
+    fov = 0.84479790990252 #field of view
+    f =  width/(2*np.tan(fov/2))# focal length of camera
+    self.im_dist = f*f/self.fy #distance to object = perceived width * im_dist
+    self.camera_info_sub.unregister()
 
   def send(self,data):
     #Take image date from cv2, convert it, and send it out to ROS
     try:
       self.image_pub.publish(self.bridge.cv2_to_imgmsg(data, "rgb8"))
+    except CvBridgeError as e:
+      print(e)
+
+  def find_tag(self,data):
+    #Take image date from cv2, convert it, and send it out to ROS
+    try:
+      self.landing_pub.publish(self.bridge.cv2_to_imgmsg(data, "rgb8"))
     except CvBridgeError as e:
       print(e)
 
@@ -64,12 +88,22 @@ class image_converter:
     if not len(cnts):
     	return data,None,None,None
     target = sorted(cnts,key=lambda c:cv2.contourArea(c))[-1]
+    area = cv2.contourArea(target)
+    diam = np.sqrt(4*area/np.pi)
+    dist = 0.255*2*self.fy/diam
+    self.dz = dist
+    print(self.dz)
+    if dist < 2:
+    	im = self.bridge.cv2_to_imgmsg(data, encoding="passthrough")
+    	self.landing_pub.publish(im)
     M = cv2.moments(target)
     if not M["m00"]:
     	return mask,None, None,None
     ct = ((M["m10"]/M["m00"]),(M["m01"]/M["m00"]))
     ci = ((data.shape[0]/2),(data.shape[1]/2))
     heading = (ct[0]-ci[0],ci[1]-ct[1])
+    self.dx = heading[0]*diam/(2*0.255)
+    self.dy = heading[1]*diam/(2*0.255)
     return mask,heading,ct,ci
 
 def main(args):

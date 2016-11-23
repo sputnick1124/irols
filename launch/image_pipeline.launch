@@ -1,0 +1,5 @@
+<launch>
+    <group ns="camera1">
+	<node pkg="image_proc" type="image_proc" name="image_proc"/>
+    </group>
+</launch>

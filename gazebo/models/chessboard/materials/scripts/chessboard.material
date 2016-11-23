@@ -1,4 +1,4 @@
-material at0/Diffuse
+material chessboard/Diffuse
 {
   technique
   {
@@ -8,7 +8,7 @@ material at0/Diffuse
 
       texture_unit
       {
-        texture atag-0_1.png
+        texture chessboard.png
       }
     }
   }

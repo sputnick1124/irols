@@ -17,7 +17,7 @@
 			<visual name='visual'>
 				<geometry>
 					<box>
-						<size>0.04 0.04 0.001</size>
+						<size>0.05 0.05 0.001</size>
 					</box>
 				</geometry>
 				<material>
@@ -28,13 +28,6 @@
 					</script>
 				</material>
 			</visual>
-			<collision name ='collision'>
-				<geometry>
-					<box>
-						<size>0.04 0.04 0.001</size>
-					</box>
-				</geometry>
-			</collision>
 		</link>     
 	</model>
 </sdf>

@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import rospy
+import tf
 from mavros_msgs.msg import State
 from mavros_msgs.srv import CommandBool, SetMode
 from std_msgs.msg import Bool
@@ -75,6 +76,21 @@ class LEZL:
 		self.pose.pose.position.x = -y
 		self.pose.pose.position.y = x
 		self.pose.pose.position.z = 5
+		ori = (data.pose.pose.orientation.x,
+			data.pose.pose.orientation.y,
+			data.pose.pose.orientation.z,
+			data.pose.pose.orientation.w)
+		br = tf.TransformBroadcaster()
+		br.sendTransform((x,y,0),
+				ori,
+				rospy.Time.now(),
+				'rover',
+				'world')
+		br.sendTransform((0,0,0.33),
+				(0,0,0,1),
+				rospy.Time.now(),
+				'platform',
+				'rover')
 		
 
 	def watchdog(self,start):

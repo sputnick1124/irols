@@ -1,6 +1,6 @@
 <?xml version='1.0'?>
 <sdf version='1.4'>
-	<model name="at0">
+	<model name="chessboard">
 		<static>false</static>
 		<link name='link'>
 			<inertial>
@@ -17,21 +17,21 @@
 			<visual name='visual'>
 				<geometry>
 					<box>
-						<size>0.04 0.04 0.001</size>
+						<size>0.279 0.215 0.001</size>
 					</box>
 				</geometry>
 				<material>
 					<script>
-						<uri>model://at0/materials/scripts</uri>
-						<uri>model://at0/materials/textures</uri>
-						<name>at0/Diffuse</name>
+						<uri>model://chessboard/materials/scripts</uri>
+						<uri>model://chessboard/materials/textures</uri>
+						<name>chessboard/Diffuse</name>
 					</script>
 				</material>
 			</visual>
 			<collision name ='collision'>
 				<geometry>
 					<box>
-						<size>0.04 0.04 0.001</size>
+						<size>0.279 0.215 0.001</size>
 					</box>
 				</geometry>
 			</collision>

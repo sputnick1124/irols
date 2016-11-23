@@ -23,4 +23,5 @@
     </include>
 
     <include file="$(find irols)/launch/irols.launch"/>
+    <include file="$(find irols)/launch/image_pipeline.launch"/>
 </launch>
