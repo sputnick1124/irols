@@ -7,11 +7,11 @@
 
     <include>
       <uri>model://camera</uri>
-      <pose>0.0 0.0 0 0 1.5708 1.5708</pose>
+      <pose>0 0 0 0 1.5708 0</pose>
     </include>
 
     <joint name="camera_joint" type="revolute">
-      <child>camera::link</child>
+      <child>camera::camera_link</child>
       <parent>lezl::base_link</parent>
       <axis>
         <xyz>0 0 1</xyz>

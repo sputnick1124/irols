@@ -8,7 +8,7 @@ material at0/Diffuse
 
       texture_unit
       {
-        texture atag-0.png
+        texture atag-0_1.png
       }
     }
   }

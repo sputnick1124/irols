@@ -1,9 +1,9 @@
 <?xml version="1.0" ?>
 <sdf version="1.4">
   <model name="camera">
-    <link name="link">
+    <link name="camera_link">
       <inertial>
-        <pose>0.01 0.025 0.025 0 -0 0</pose>
+        <pose>0 0 0.025 0 -0 0</pose>
         <mass>0.01</mass>
         <inertia>
           <ixx>4.15e-6</ixx>
@@ -25,8 +25,8 @@
         <camera>
           <horizontal_fov>0.84479790990252</horizontal_fov>
           <image>
-            <width>240</width>
-            <height>240</height>
+            <width>480</width>
+            <height>480</height>
           </image>
           <clip>
             <near>0.1</near>

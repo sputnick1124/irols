@@ -2,4 +2,5 @@
     <group ns="camera1">
 	<node pkg="image_proc" type="image_proc" name="image_proc"/>
     </group>
+    <remap from="/camera1/camera_info" to="/landing_pad/camera_info" />
 </launch>

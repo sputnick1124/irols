@@ -24,4 +24,5 @@
 
     <include file="$(find irols)/launch/irols.launch"/>
     <include file="$(find irols)/launch/image_pipeline.launch"/>
+    <include file="$(find irols)/launch/apriltags_ros.launch"/>
 </launch>

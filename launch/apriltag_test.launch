@@ -2,4 +2,6 @@
 
 	<arg name="world_name" value="$(find irols)/gazebo/worlds/apriltag_test.world"/>
 	<include file="$(find gazebo_ros)/launch/empty_world.launch"/>
+	<include file="$(find irols)/launch/image_pipeline.launch"/>
+	<include file="$(find apriltags_ros)/launch/example.launch"/>
 </launch>

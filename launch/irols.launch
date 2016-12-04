@@ -1,5 +1,7 @@
 <launch>
 
 	<!--node pkg="irols" type="cv_bridge_stream_recv.py" name="cam_stream"/-->
+	<!--node pkg="irols" type="lezl_follow.py" name="lezl_node"/-->
+	<!--node pkg="irols" type="controller.py" name="controller_node"/-->
 
 </launch>
