@@ -3,5 +3,6 @@
 	<node pkg="irols" type="cv_bridge_stream_recv.py" name="cam_stream"/>
 	<node pkg="irols" type="lezl_follow.py" name="lezl_node"/>
 	<node pkg="irols" type="controller.py" name="controller_node"/>
+    <node pkg="rqt_image_view" type="rqt_image_view" name="image_viewer" args="/camera1/image_raw"/>
 
 </launch>
