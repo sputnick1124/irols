@@ -55,10 +55,10 @@
         <surface>
           <friction>
             <ode>
-              <mu>1000000</mu>
-              <mu2>100</mu2>
-              <slip1>1.5</slip1>
-              <slip2>1.5</slip2>
+              <mu>1</mu>
+              <mu2>1</mu2>
+              <slip1>0.5</slip1>
+              <slip2>0</slip2>
             </ode>
             <!--bullet>
               <friction>1.6</friction>
@@ -100,10 +100,10 @@
         <surface>
           <friction>
             <ode>
-              <mu>1000000</mu>
-              <mu2>100</mu2>
-              <slip1>1.5</slip1>
-              <slip2>1.5</slip2>
+              <mu>1</mu>
+              <mu2>1</mu2>
+              <slip1>0.5</slip1>
+              <slip2>0</slip2>
             </ode>
             <!--bullet>
               <friction>1.6</friction>
@@ -145,10 +145,10 @@
         <surface>
           <friction>
             <ode>
-              <mu>1000000</mu>
-              <mu2>100</mu2>
-              <slip1>1.5</slip1>
-              <slip2>1.5</slip2>
+              <mu>1</mu>
+              <mu2>1</mu2>
+              <slip1>0.5</slip1>
+              <slip2>0</slip2>
             </ode>
             <!--bullet>
               <friction>1.6</friction>
@@ -190,10 +190,10 @@
         <surface>
           <friction>
             <ode>
-              <mu>1000000</mu>
-              <mu2>100</mu2>
-              <slip1>1.5</slip1>
-              <slip2>1.5</slip2>
+              <mu>1</mu>
+              <mu2>1</mu2>
+              <slip1>0.5</slip1>
+              <slip2>0</slip2>
             </ode>
             <!--bullet>
               <friction>1.6</friction>

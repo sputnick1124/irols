@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<sdf version="1.5">
+<sdf version="1.6">
   <world name="default">
     <scene>
       <sky>
@@ -19,10 +19,6 @@
     <include>
       <uri>model://pioneer3at_lander</uri>
       <pose>3 3 0 0 0 0</pose>
-    </include>
-    <include>
-      <uri>model://lezl_cam</uri>
-      <pose>0 0 0 0 0 0</pose>
     </include>
     <include>
       <uri>model://asphalt_plane</uri>

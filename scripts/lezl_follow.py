@@ -118,8 +118,8 @@ class LEZL:
 	def odom_cb(self,data):
 		x = data.pose.pose.position.x
 		y = data.pose.pose.position.y
-		self.pose.pose.position.x = -y
-		self.pose.pose.position.y = x
+		self.pose.pose.position.x = x
+		self.pose.pose.position.y = y
 		self.pose.pose.position.z = 25
 		ori = (data.pose.pose.orientation.x,
 			data.pose.pose.orientation.y,
