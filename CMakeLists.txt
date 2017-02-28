@@ -63,10 +63,11 @@ find_package(catkin REQUIRED COMPONENTS
 ##     and list every .cfg file to be processed
 
 ## Generate dynamic reconfigure parameters in the 'cfg' folder
-# generate_dynamic_reconfigure_options(
-#   cfg/DynReconf1.cfg
-#   cfg/DynReconf2.cfg
-# )
+find_package(catkin REQUIRED dynamic_reconfigure)
+generate_dynamic_reconfigure_options(
+   cfg/pid_gains.cfg
+	 cfg/picture.cfg
+ )
 
 ###################################
 ## catkin specific configuration ##
@@ -164,6 +165,6 @@ install(DIRECTORY  scripts launch
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
 
-add_executable(offboard src/offboard.cpp)
-target_link_libraries(offboard ${catkin_LIBRARIES})
+#add_executable(offboard src/offboard.cpp)
+#target_link_libraries(offboard ${catkin_LIBRARIES})
 #add_dependencies(offboard te_messages_cpp)
