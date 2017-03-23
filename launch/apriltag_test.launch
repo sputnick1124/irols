@@ -1,7 +1,12 @@
 <launch>
 
 	<arg name="world_name" value="$(find irols)/gazebo/worlds/apriltag_test.world"/>
-	<include file="$(find gazebo_ros)/launch/empty_world.launch"/>
+	<include file="$(find gazebo_ros)/launch/empty_world.launch">
+        <arg name="world_name" value="$(arg world_name)"/>
+    </include>
 	<include file="$(find irols)/launch/image_pipeline.launch"/>
 	<include file="$(find apriltags_ros)/launch/example.launch"/>
+    <node pkg="irols" type="homography_test.py" name="homography"/>
+    <node pkg="rqt_reconfigure" type="rqt_reconfigure" name="rqt_reconfigure"/>
+    <node pkg="rqt_image_view" type="rqt_image_view" name="rqt_image_view"/>
 </launch>

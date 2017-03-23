@@ -67,6 +67,7 @@ find_package(catkin REQUIRED dynamic_reconfigure)
 generate_dynamic_reconfigure_options(
    cfg/pid_gains.cfg
 	 cfg/picture.cfg
+	 cfg/moveCam.cfg
  )
 
 ###################################
