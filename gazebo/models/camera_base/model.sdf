@@ -1,0 +1,22 @@
+<?xml version="1.0" ?>
+<sdf version="1.4">
+  <model name="camera_base">
+    <!--static>true</static-->
+    <link name='base'>
+      <pose frame=''>0 0 0 0 -0 0</pose>
+      <inertial>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+        <mass>0.015</mass>
+        <inertia>
+          <ixx>1e-05</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>1e-05</iyy>
+          <iyz>0</iyz>
+          <izz>1e-05</izz>
+        </inertia>
+      </inertial>
+      <gravity>0</gravity>
+    </link>
+  </model>
+</sdf>

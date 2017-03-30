@@ -2,9 +2,27 @@
 <sdf version="1.4">
   <model name="camera_static">
     <!--static>true</static-->
-    <link name="link">
+<!--
+    <link name='base'>
+      <pose frame=''>0 0 0 0 -0 0</pose>
       <inertial>
-        <pose>0.01 0.025 0.025 0 -0 0</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+        <mass>0.015</mass>
+        <inertia>
+          <ixx>1e-05</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>1e-05</iyy>
+          <iyz>0</iyz>
+          <izz>1e-05</izz>
+        </inertia>
+      </inertial>
+      <gravity>0</gravity>
+    </link>
+-->
+    <link name="camera">
+      <inertial>
+        <pose frame="base">0 0 0 0 1.57 0</pose>
         <mass>0.01</mass>
         <inertia>
           <ixx>4.15e-6</ixx>
@@ -56,5 +74,20 @@
       </sensor>
       <gravity>0</gravity>
     </link>
+<!--
+    <joint name="camera" type="revolute">
+      <child>camera</child>
+      <parent>base</parent>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>0</lower>
+          <upper>0</upper>
+          <effort>0</effort>
+          <velocity>0</velocity>
+        </limit>
+      </axis>
+    </joint>
+-->
   </model>
 </sdf>

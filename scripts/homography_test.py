@@ -29,11 +29,12 @@ class CameraMover(object):
         z = config['z']
         phi = config['phi']
         theta = config['theta']
-        psi = config['psi']
+        psi = config['psi'] + 1.57
         model_state.pose.position.x = x
         model_state.pose.position.y = y
         model_state.pose.position.z = z
-        q = qfe(phi,theta,psi,'rxyz')
+#        R = np.matrix(eul_mat(0,1.57,0,'rzxy'))
+        q = qfe(phi,theta,psi,'rxyx')
         model_state.pose.orientation.x = q[0]
         model_state.pose.orientation.y = q[1]
         model_state.pose.orientation.z = q[2]
@@ -45,23 +46,23 @@ class CameraMover(object):
 class Homographer(object):
     def __init__(self):
         self.bridge = CvBridge()
-        self.image_sub = rospy.Subscriber("/camera1/image_rect_color",Image,self.recv)
-        self.cam_mover = CameraMover()
         self.cam_info = rospy.wait_for_message('/camera1/camera_info',CameraInfo)
         self.K = np.matrix(self.cam_info.K).reshape((3,3))
         self.fy = self.K[1,1]
+        self.image_sub = rospy.Subscriber("/camera1/image_rect_color",Image,self.recv)
+        self.cam_mover = CameraMover()
 
     def recv(self,data):
         #Take image date from ROS, convert it, and display it in a cv2 frame
         im = self.bridge.imgmsg_to_cv2(data,"bgr8")
         mask,heading,ct,ci = self.detect_target(im)
         if heading is None:# or any([abs(x)>0.2 for x in [self.imu.dqx,self.imu.dqy,self.imu.dqz,self.imu.dqw]]):
-            cv2.imshow('from_pi',im)
+            cv2.imshow('from_cam',im)
             cv2.waitKey(3)
         else:
             im = cv2.bitwise_and(im,im,mask=mask)
             imline = cv2.line(im,(int(ci[0]),int(ci[1])),(int(ct[0]),int(ct[1])),(0,0,255))
-            cv2.imshow('from_pi',im)
+            cv2.imshow('from_cam',im)
             cv2.waitKey(3)
     #    self.heading_pub.publish(self.heading)
     #    self.camera_info_pub.publish(self.cam_info)
@@ -72,7 +73,7 @@ class Homographer(object):
         yel_hi = (30,255,255)
         mask = cv2.inRange(hsv,yel_lo,yel_hi)
         _,cnts,heir = cv2.findContours(mask,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
-        print(cnts)
+        #print(cnts)
         if not len(cnts):
             return data,None,None,None
         target = sorted(cnts,key=lambda c:cv2.contourArea(c))[-1]
@@ -84,8 +85,8 @@ class Homographer(object):
             diam = np.sqrt(4*area/np.pi)
             dist = 0.255*2*self.fy/diam
         self.dz = self.cam_mover.pose.position.z #cheat for now
-    #    self.dz = dist
-        print(self.dz,diam)
+        #self.dz = dist
+        #print(self.dz,diam)
         M = cv2.moments(target)
         if not M["m00"]:
             return mask,None, None,None
@@ -94,12 +95,14 @@ class Homographer(object):
         Pc = Pc/Pc[2] * dist
         o = self.cam_mover.pose.orientation
         q = [o.x,o.y,o.z,o.w]
-        r,p,y = efq(q)
-        R = np.matrix(eul_mat(y,p,r,axes='rzxy'))[:3,:3]
+        r,p,y = efq(q,'rxyx')
+        p -= 1.57
+        y -= 1.57
+        R = np.matrix(eul_mat(-p,-r,y,axes='rzxz'))[:3,:3]
         Pr = R*Pc
         self.dx = -Pr[0]
         self.dy = -Pr[1]
-        
+        print('dx',float(Pr[0]),' dy',float(Pr[1]),'rpy',-p,-r,y)
         ct = ((M["m10"]/M["m00"]),(M["m01"]/M["m00"]))
         ci = ((data.shape[0]/2),(data.shape[1]/2))
         heading = (ct[0]-ci[0],ci[1]-ct[1])

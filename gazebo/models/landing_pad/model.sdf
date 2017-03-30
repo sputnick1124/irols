@@ -31,6 +31,7 @@
         <cast_shadows>1</cast_shadows>
         <transparency>0</transparency>
       </visual>
+      <!--
       <visual name='inner_circle'>
         <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
@@ -52,6 +53,7 @@
         <cast_shadows>1</cast_shadows>
         <transparency>0</transparency>
       </visual>
+      -->
 	<visual name='visual'>
 	    <pose frame=''>0 0 0.0025 0 0 1.57</pose>
 	    <!--pose frame=''>0 0.08 0.0025 0 0 1.57</pose-->
@@ -103,6 +105,7 @@
         <cast_shadows>1</cast_shadows>
         <transparency>0</transparency>
       </visual-->
+      <!--
       <visual name='h_left'>
         <pose frame=''>-0.069 0 0 0 -0 0</pose>
         <geometry>
@@ -175,6 +178,7 @@
         <cast_shadows>1</cast_shadows>
         <transparency>0</transparency>
       </visual>
+      -->
       <collision name='collision'>
         <laser_retro>0</laser_retro>
         <max_contacts>10</max_contacts>
