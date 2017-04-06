@@ -13,6 +13,7 @@ from cv_bridge import CvBridge
 from tf.transformations import euler_matrix as eul_mat
 from tf.transformations import quaternion_from_euler as qfe
 from tf.transformations import euler_from_quaternion as efq
+from numpy.linalg import inv
 from math import sqrt
 
 class CameraMover(object):
@@ -29,7 +30,7 @@ class CameraMover(object):
         z = config['z']
         phi = config['phi']
         theta = config['theta']
-        psi = config['psi'] + 1.57
+        psi = -config['psi']
         model_state.pose.position.x = x
         model_state.pose.position.y = y
         model_state.pose.position.z = z
@@ -93,16 +94,18 @@ class Homographer(object):
         Pi = np.matrix((M["m10"]/M["m00"],M["m01"]/M["m00"],1)).T
         Pc = self.K.I*Pi
         Pc = Pc/Pc[2] * dist
+        Pc[1] *= -1
         o = self.cam_mover.pose.orientation
         q = [o.x,o.y,o.z,o.w]
         r,p,y = efq(q,'rxyx')
         p -= 1.57
-        y -= 1.57
-        R = np.matrix(eul_mat(-p,-r,y,axes='rzxz'))[:3,:3]
-        Pr = R*Pc
-        self.dx = -Pr[0]
+        R = np.matrix(eul_mat(y,p,-r,axes='rzxy'))[:3,:3]
+        #R = np.matrix(eul_mat(r,p,y))[:3,:3]
+        L = np.diag([1,1,-1])
+        Pr = R*L*Pc
+        self.dx = Pr[0]
         self.dy = -Pr[1]
-        print('dx',float(Pr[0]),' dy',float(Pr[1]),'rpy',-p,-r,y)
+        print('dx',float(Pr[0]),' dy',float(Pr[1]),'rpy',r,p,-y)
         ct = ((M["m10"]/M["m00"]),(M["m01"]/M["m00"]))
         ci = ((data.shape[0]/2),(data.shape[1]/2))
         heading = (ct[0]-ci[0],ci[1]-ct[1])
@@ -110,7 +113,6 @@ class Homographer(object):
     ##    self.dy = heading[1]*diam/(self.fy*2*0.255)
     #    self.dx = self.dz*np.tan(np.arctan(heading[0]/self.fy))
     #    self.dy = self.dz*np.tan(np.arctan(heading[1]/self.fy))
-        
         return mask,heading,ct,ci
 
 if __name__ == "__main__":
