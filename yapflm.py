@@ -208,7 +208,7 @@ class MF(object):
             self.params = [0+i*dr for i in xrange(p)]
         if not len(self.params) == 3:
             #Throw invalid param number exception
-            raise ParamError(params,'len({}) != 3'.format(params))
+            raise ParamError(self.params,'len({}) != 3'.format(self.params))
         if parent.vartype == 1:
             self.mf = InputTriMF(self.params)
         elif parent.vartype == 0:
