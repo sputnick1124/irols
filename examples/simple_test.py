@@ -18,7 +18,7 @@ fis.input[0].addmf('small',[0, 0, 1])
 fis.input[0].addmf('large',[0, 1, 1])
 
 fis.input[1].addmf('small',[0, 0, 1])
-fis.input[1].addmf('small',[0, 1, 1])
+fis.input[1].addmf('large',[0, 1, 1])
 
 fis.output[0].addmf('bad',[0, 0, 0.5])
 fis.output[0].addmf('medium',[0, 0.5, 1])
