@@ -1,20 +1,10 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Thu Jun  9 08:25:34 2016
-
-@author: nick
-"""
 from __future__ import division , print_function
 import numpy as np
   
 class FIS(object):
-#    comboper =  {'max'      :   np.max,
-#                 'min'      :   np.min}
-#                 
-#    oper =      {'max'      :   np.maximum,
-#                 'min'      :   np.minimum,
-#                 'sum'      :   np.sum,
-#                 'prod'     :   np.prod}
+    """
+    An object to hold a representation of a FIS. 
+    """
     comboper =  {'max'      :   max,
                  'min'      :   min}
                  
@@ -58,6 +48,9 @@ class FIS(object):
         return self.__dict__ == other.__dict__
 
     def check(self):
+        """
+        Meta self-diagnosis helper function
+        """
         return all(var.check() for var in self.input + self.output)
 
     def addvar(self,vartype,varname):
