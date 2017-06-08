@@ -45,7 +45,15 @@ class FIS(object):
         return s
 
     def __eq__(self,other):
-        return self.__dict__ == other.__dict__
+        """
+        Only compare similar keys in the dict so we can compare a GFS to a FIS
+        """
+#        return self.__dict__ == other.__dict__ #traditional method
+        common_keys = set(self.__dict__.keys()).intersection(other.__dict__.keys())
+        for k in common_keys:            
+            if self.__dict__[k] != other.__dict__[k]:
+                return False
+        return True
 
     def check(self):
         """
@@ -192,26 +200,35 @@ class FuzzyVar(object):
 class MF(object):
     def __init__(self,mfname,mfparams,parent=None):
         self.name = mfname
+        self.parent = parent
         if mfparams is not None:
 #            print('i have params')
-            self.params = mfparams
+            self._params = mfparams
         else:
             p = 3
             dr = 1/(p-1)
-            self.params = [0+i*dr for i in xrange(p)]
-        if not len(self.params) == 3:
+            self._params = [0+i*dr for i in xrange(p)]
+        if not len(self._params) == 3:
             #Throw invalid param number exception
-            raise ParamError(self.params,'len({}) != 3'.format(self.params))
+            raise ParamError(self._params,'len({}) != 3'.format(self._params))
         if parent.vartype == 1:
-            self.mf = InputTriMF(self.params)
+            self.mf = InputTriMF(self.params)            
         elif parent.vartype == 0:
             self.mf = OutputTriMF(self.params)
-        
+
+    @property
+    def params(self):
+        return self._params
+    @params.setter
+    def params(self,val):
+        self._params = val
+        self.mf.get_slopes(val)
+    
     def __str__(self,indent=''):
-        mf_atts = ['name','params']
+        mf_atts = ['name','_params']
         s = ''
         for att in mf_atts:
-            s += indent + '{0:>10}: {1}\n'.format(att,self.__dict__[att])
+            s += indent + '{0:>10}: {1}\n'.format(att.strip('_'),self.__dict__[att])
         return s
 
     def __eq__(self,other):
@@ -245,7 +262,12 @@ class Rule(object):
         return self.__dict__ == other.__dict__
 
 class TriMF(object):
-    def __init__(self,params):
+    def __init__(self,params=None):
+        self.slope = [None]*2
+        self.y_int = [None]*2
+        self.get_slopes(params)
+    
+    def get_slopes(self,params):
         a,x_star,b = params
         err = [x_star < a, x_star > b]
         if any(err):
@@ -254,28 +276,30 @@ class TriMF(object):
             e = [errs[i] for i,_ in enumerate(err) if _]
             raise ParamError(params,'Invalid params {}: {}'.format(e,params))
         if a != x_star:
-            self.m1 = 1 / (x_star - a)
-            self.b1 = -self.m1 * a
+            self.slope[0] = 1 / (x_star - a)
+            self.y_int[0] = -self.slope[0] * a
         else:
-            self.m1, self.b1 = None, None
+            self.slope[0], self.y_int[0] = None, None
         if b != x_star:
-            self.m2 = -1 / (b - x_star)
-            self.b2 = 1 - (self.m2 * x_star)
+            self.slope[1] = -1 / (b - x_star)
+            self.y_int[1] = 1 - (self.slope[1] * x_star)
         else:
-            self.m2, self.b2 = None, None
+            self.slope[1], self.y_int[1] = None, None
         self.a, self.b = a, b
         self.x_star = x_star
+    
+    def __eq__(self,other):
+        return self.__dict__ == other.__dict__
+        
 
 class InputTriMF(TriMF):
     def __init__(self,*args,**kwargs):
         super(InputTriMF,self).__init__(*args,**kwargs)
-        self.eval_args = [(self.m1, self.b1), (self.m2, self.b2)]
         self.fn = infn
-#        self.fns = [(lambda x: (self.m1 * x) + self.b1) if self.m1 else None,
-#                    (lambda x: (self.m2 * x) + self.b2) if self.m2 else None]
     
     def __call__(self,x):
-        return self.fn(x,*self.eval_args[x >= self.x_star])
+        line = x >= self.x_star
+        return self.fn(x,self.slope[line],self.y_int[line])
     
 class OutputTriMF(TriMF):
     def __init__(self,*args,**kwargs):
@@ -287,8 +311,8 @@ class OutputTriMF(TriMF):
     def __call__(self,y):
         start =  (self.a, 0)
         end   =  (self.b, 0)
-        truncval1 = self.fn(y, self.m1, self.b1)
-        truncval2 = self.fn(y, self.m2, self.b2)
+        truncval1 = self.fn(y, self.slope[0], self.y_int[0])
+        truncval2 = self.fn(y, self.slope[1], self.y_int[1])
         trunc1 = ((truncval1, y) if truncval1 else (self.a, y))
         trunc2 = ((truncval2, y) if truncval2 else (self.b, y))
         return [start, trunc1, trunc2, end]
