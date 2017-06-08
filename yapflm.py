@@ -45,15 +45,7 @@ class FIS(object):
         return s
 
     def __eq__(self,other):
-        """
-        Only compare similar keys in the dict so we can compare a GFS to a FIS
-        """
-#        return self.__dict__ == other.__dict__ #traditional method
-        common_keys = set(self.__dict__.keys()).intersection(other.__dict__.keys())
-        for k in common_keys:            
-            if self.__dict__[k] != other.__dict__[k]:
-                return False
-        return True
+        return self.__dict__ == other.__dict__ #traditional method
 
     def check(self):
         """
