@@ -109,7 +109,7 @@ class FIS(object):
             consequent = rule[numInput:numInput+numOutput]
             weight = rule[-2]
             connection = rule[-1]
-            self.rule.append(Rule(antecedent,consequent,weight,connection))
+            self.rule.append(FuzzyRule(antecedent,consequent,weight,connection))
     
     def evalfis(self,x):
         if not hasattr(x,'__iter__'):
@@ -150,14 +150,17 @@ class FIS(object):
         return outputs if len(outputs)>1 else outputs[0]
 
 class FuzzyVar(object):
-    def __init__(self,varname,parent=None,vartype=None):
+    def __init__(self,varname='',parent=None,vartype=None):
         self.name = varname
         self.mf = []
         self.parent = parent
-        if vartype:
-            self.num = len(parent.input)
-        elif vartype == 0:
-            self.num = len(parent.output)
+        if parent is not None:
+            if vartype == 1:
+                self.num = len(parent.input)
+            elif vartype == 0:
+                self.num = len(parent.output)
+            else:
+                self.num = None
         self.vartype = vartype
 
     def __str__(self,indent=''):
@@ -233,7 +236,7 @@ class MF(object):
     def evalmf(self,x):
         return self.mf(x)
         
-class Rule(object):
+class FuzzyRule(object):
     def __init__(self,antecedent,consequent,weight,connection):
         self.antecedent = antecedent
         self.consequent = consequent
