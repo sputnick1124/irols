@@ -55,12 +55,12 @@ class FIS(object):
 
     def addvar(self,vartype,varname):
         if vartype in 'input':
-            self.input.append(FuzzyVar(varname,self,1))
+            self.input.append(FuzzyVar(varname,1))
             if len(self.rule) > 0:
                 for rule in self.rule:
                     rule.antecedent += [0]
         elif vartype in 'output':
-            self.output.append(FuzzyVar(varname,self,0))
+            self.output.append(FuzzyVar(varname,0))
             if len(self.rule) > 0:
                 for rule in self.rule:
                     rule.consequent += [0]
@@ -150,17 +150,17 @@ class FIS(object):
         return outputs if len(outputs)>1 else outputs[0]
 
 class FuzzyVar(object):
-    def __init__(self,varname='',parent=None,vartype=None):
+    def __init__(self,varname='',vartype=None):
         self.name = varname
         self.mf = []
-        self.parent = parent
-        if parent is not None:
-            if vartype == 1:
-                self.num = len(parent.input)
-            elif vartype == 0:
-                self.num = len(parent.output)
-            else:
-                self.num = None
+#        self.parent = parent
+#        if parent is not None:
+#            if vartype == 1:
+#                self.num = len(parent.input)
+#            elif vartype == 0:
+#                self.num = len(parent.output)
+#            else:
+#                self.num = None
         self.vartype = vartype
 
     def __str__(self,indent=''):
@@ -174,13 +174,16 @@ class FuzzyVar(object):
         return s
  
     def __eq__(self,other):
-        local_dict = self.__dict__.copy()
-        other_dict = other.__dict__.copy()
-        local_dict.pop('parent')
-        other_dict.pop('parent')
+#        local_dict = self.__dict__.copy()
+#        other_dict = other.__dict__.copy()
+#        local_dict.pop('parent')
+#        other_dict.pop('parent')
         return local_dict == other_dict
 
     def check(self):
+        """
+        Sanity check. Make sure that each mf at least can evaluate a number.
+        """
         retval =  any(mf.evalmf(None) for mf in self.mf)
         return retval
 
@@ -210,6 +213,8 @@ class MF(object):
             self.mf = InputTriMF(self.params)            
         elif parent.vartype == 0:
             self.mf = OutputTriMF(self.params)
+        else:
+            print("I failed to get a variable type!")
 
     @property
     def params(self):
