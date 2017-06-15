@@ -72,7 +72,11 @@ class GFS(FIS):
         return c1,c2
 
     def mutate(self):
-        pass
+        for inp in self.input:
+            inp.mutate()
+        for outp in self.output:
+            outp.mutate()
+        self.rule.mutate()
 
     def addvar(self,num_mfs,vartype,varname):
         if vartype in 'input':
@@ -208,11 +212,11 @@ class GenFuzzyRuleBase(object):
         up_down = (-1,1)
         for g in range(num_gen):
             tau = randint(0,1)
-            m = randint(0,len(self.consequents))
+            m = randint(0,len(self.consequents)-1)
             c = randint(0,len(self.out_mfs)-1)
-            if self.consequents[m][c] == 0:
+            if (self.consequents[m][c] == 0) and (self.out_mfs[c] > 0):
                 self.consequents[m][c] += 1
-            elif self.consequents[m][c] == self.out_mfs[c]-1:
+            elif (self.consequents[m][c] == self.out_mfs[c]-1):
                 self.consequents[m][c] -= 1
             else:
                 self.consequents[m][c] += up_down[tau]
@@ -228,5 +232,5 @@ class GenFuzzyRuleBase(object):
         i,j  = randint(0,len(self.consequents)), randint(0,len(self.consequents))
         c1 = p1[:i] + p2[i:j] + p1[j:]
         c2 = p2[:i] + p1[i:j] + p2[j:]
-        return GenFuzzyRuleBase(antecedents=self.antecedents,consequents=c1),\
-               GenFuzzyRuleBase(antecedents=self.antecedents,consequents=c2)
+        return GenFuzzyRuleBase(antecedents=self.antecedents,consequents=c1,out_mfs=self.out_mfs),\
+               GenFuzzyRuleBase(antecedents=self.antecedents,consequents=c2,out_mfs=self.out_mfs)
