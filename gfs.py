@@ -18,7 +18,7 @@ class GFS(FIS):
     A genetic representation of a Fuzzy system. Contains methods to reproduce,
     mutate, and randomize its own parameters.
     """
-    def __init__(self,in_mfs,out_mfs,name=''):
+    def __init__(self,in_mfs,out_mfs,name='',in_ranges=None,out_ranges=None):
         super(GFS,self).__init__(name=name)
         if not hasattr(in_mfs,'__iter__'):
             self.in_mfs = [in_mfs]
@@ -28,6 +28,8 @@ class GFS(FIS):
             self.out_mfs = [out_mfs]
         else:
             self.out_mfs = out_mfs
+        self.in_ranges = in_ranges
+        self.out_ranges = out_ranges
         self.num_in = len(self.in_mfs)
         self.num_out = len(self.out_mfs)
         self.num_rule = reduce(mul,self.in_mfs)
@@ -36,10 +38,18 @@ class GFS(FIS):
         self.init_rules()
 
     def init_vars(self):
-        for input_mfs in self.in_mfs:
-            self.addvar(input_mfs,'input','')
-        for output_mfs in self.out_mfs:
-            self.addvar(output_mfs,'output','')
+        if self.in_ranges is None:
+            in_ranges = [(0,1) for _ in range(len(self.in_mfs))]
+        else:
+            in_ranges = self.in_ranges
+        if self.out_ranges is None:
+            out_ranges = [(0,1) for _ in range(len(self.out_mfs))]
+        else:
+            out_ranges = self.out_ranges
+        for inp,input_mfs in enumerate(self.in_mfs):
+            self.addvar(input_mfs,'input','',in_ranges[inp])
+        for outp,output_mfs in enumerate(self.out_mfs):
+            self.addvar(output_mfs,'output','',out_ranges[outp])
 
     def init_rules(self):
         self.rule = GenFuzzyRuleBase(in_mfs=self.in_mfs,out_mfs=self.out_mfs)
@@ -71,18 +81,18 @@ class GFS(FIS):
         c1.rule,c2.rule = self.rule.crossover(other.rule)
         return c1,c2
 
-    def mutate(self):
+    def mutate(self,percent=0):
         for inp in self.input:
-            inp.mutate()
+            inp.mutate(perc=percent)
         for outp in self.output:
-            outp.mutate()
+            outp.mutate(perc=percent)
         self.rule.mutate()
 
-    def addvar(self,num_mfs,vartype,varname):
+    def addvar(self,num_mfs,vartype,varname,varrange):
         if vartype in 'input':
-            self.input.append(GenFuzzyVar(num_mfs,1))
+            self.input.append(GenFuzzyVar(num_mfs,1,varrange))
         elif vartype in 'output':
-            self.output.append(GenFuzzyVar(num_mfs,0))
+            self.output.append(GenFuzzyVar(num_mfs,0,varrange))
         else:
             #Throw an invalid variable type exception
             pass
@@ -99,12 +109,12 @@ class GenFuzzyVar(FuzzyVar):
         bins = []
         interval = (self.varrange[1]-self.varrange[0])/(num_mfs-1)
         # make the 'buckets' in which the params need to reside
-        bins.append((self.varrange[0],interval/2))
+        bins.append((self.varrange[0],self.varrange[0]+interval/2))
         for mf in range(1,num_mfs-1):
             bins.append(
             (self.varrange[0] + interval*mf - interval/2,
              self.varrange[0] + interval*mf + interval/2))
-        bins.append((self.varrange[1] - interval/2, 1))
+        bins.append((self.varrange[1] - interval/2, self.varrange[1]))
         # assign a bucket to each of the params
         self.buckets = [(self.varrange[0],)*2]*2 + [bins[1]]        
         for p in range(1,len(bins)-1):
@@ -130,7 +140,7 @@ class GenFuzzyVar(FuzzyVar):
         params = [random()*(b-a)+a for a,b in self.buckets]
         self.update(params)
 
-    def mutate(self,num_gene=2,perc=0):
+    def mutate(self,num_gene=1,perc=0):
         for g in range(num_gene):
             m = randint(2,self.num_params-2)
             r = random()

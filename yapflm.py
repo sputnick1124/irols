@@ -298,7 +298,7 @@ class InputTriMF(TriMF):
         self.fn = infn
     
     def __call__(self,x):
-        line = x >= self.x_star
+        line = x > self.x_star
         return self.fn(x,self.slope[line],self.y_int[line])
     
 class OutputTriMF(TriMF):

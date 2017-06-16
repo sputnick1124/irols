@@ -9,8 +9,8 @@ from random import triangular
 
 
 class GA(object):
-    def __init__(self,popSize=100,genMax=200,numElite=15,numRecomb=50,
-                 numMut=25,numRand=10,stagnation=10):
+    def __init__(self,popSize=100,genMax=200,numElite=5,numRecomb=50,
+                 numMut=35,numRand=10,stagnation=10):
         popTrial = sum([numElite,numRecomb,numMut,numRand])
         if popTrial != popSize:
             popPer = popSize/popTrial
@@ -49,20 +49,20 @@ class GA(object):
         self.pop_curr = sorted_fitness[0]
         self.fitness_hist.append(sorted_fitness[1][0])
 
-    def iter_generation(self):
+    def iter_generation(self,gen_curr=0):
         pop_new = []
         for i in range(self.numElite):
             pop_new.append(deepcopy(self.pop_curr[i]))
-        for i in range(self.numRecomb + self.numMut):
+        for i in range(0,self.numRecomb + self.numMut,2):
             p1_ind = int(triangular(0,self.popSize,0))
             p2_ind = int(triangular(0,self.popSize,0))
             p1 = self.pop_curr[p1_ind]
             p2 = self.pop_curr[p2_ind]
             c1,c2 = p1.crossover(p2)
             if i >= self.numRecomb:
-                c1.mutate()
-                c2.mutate()
-            pop_new.append(c1)
+                c1.mutate(gen_curr/self.genMax)
+                c2.mutate(gen_curr/self.genMax)
+            pop_new.extend([c1,c2])
         for i in range(self.numRand):
             c1 = deepcopy(self.pop_curr[-i])
             c1.randomize()
@@ -73,13 +73,15 @@ class GA(object):
         self.init_population()
         for gen in range(self.genMax):
 #            print("kajsdnflkjnasdflkjasdff")
-            print("Generation: {}".format(gen))
+            print("Generation: {}, ".format(gen),end='')
             self.eval_population()
+            print("Best Fitness: {}".format(self.fitness_hist[-1]))
 #            if gen > 10 and\
 #                abs(self.fitness_hist[-1] - sum(self.fitness_hist[-10:])/10.) < 0.000001:
 #                return self.pop_curr[0]
             self.iter_generation()
         self.eval_population()
+        print("Best Fitness: {}".format(self.fitness_hist[-1]))
         return self.pop_curr[0]
 
     def close(self):
