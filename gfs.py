@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 from __future__ import division
-from yapflm import FIS, FuzzyVar, FuzzyRule
+from yapflm import FIS, FuzzyVar, FuzzyRule, MF, ParamError
 from operator import mul
 
 from itertools import product
-from random import random, randint
+from random import random, randint, sample
 from copy import deepcopy
 
 def in_range(x,interval):
@@ -82,10 +82,9 @@ class GFS(FIS):
         return c1,c2
 
     def mutate(self,percent=0):
-        for inp in self.input:
-            inp.mutate(perc=percent)
-        for outp in self.output:
-            outp.mutate(perc=percent)
+        variables = sample(self.input + self.output,1)
+        for var in variables:
+            var.mutate(randint(0,var.num_mfs-1),randint(0,2),percent)
         self.rule.mutate()
 
     def addvar(self,num_mfs,vartype,varname,varrange):
@@ -116,13 +115,15 @@ class GenFuzzyVar(FuzzyVar):
              self.varrange[0] + interval*mf + interval/2))
         bins.append((self.varrange[1] - interval/2, self.varrange[1]))
         # assign a bucket to each of the params
-        self.buckets = [(self.varrange[0],)*2]*2 + [bins[1]]        
+        buckets = [(self.varrange[0],)*2]*2 + [bins[1]]        
         for p in range(1,len(bins)-1):
-            self.buckets.append(bins[p-1])
-            self.buckets.append(bins[p])
-            self.buckets.append(bins[p+1])
-        self.buckets.append(bins[-2])
-        self.buckets.extend([(self.varrange[1],)*2]*2)
+            buckets.append(bins[p-1])
+            buckets.append(bins[p])
+            buckets.append(bins[p+1])
+        buckets.append(bins[-2])
+        buckets.extend([(self.varrange[1],)*2]*2)
+        for b in range(self.num_mfs):
+            self.addmf('',buckets[b*3:b*3+3],self)
 
     def serialize(self):
         return sum([mf.params for mf in self.mf],[])
@@ -135,38 +136,64 @@ class GenFuzzyVar(FuzzyVar):
             for ind,mf in enumerate(self.mf):
                 mf.params = params[ind*3:ind*3+3]
 
+    def addmf(self,mfname,buckets,parent=None):
+        try:
+            mf = GenFuzzyMF(buckets,mfname,parent)
+        except ParamError as e:
+            raise(e)
+        self.mf.append(mf)
+                
 
     def randomize(self):
-        params = [random()*(b-a)+a for a,b in self.buckets]
-        self.update(params)
+        for mf in self.mf:
+            mf.randomize()
 
-    def mutate(self,num_gene=1,perc=0):
-        for g in range(num_gene):
-            m = randint(2,self.num_params-2)
-            r = random()
-            cur = self.mf[m//3].params[m%3]
-            tau = randint(0,1)
-            if tau:
-                delta = (self.buckets[m][1] - cur) * (1-r*(1-perc**1.5))
-            else:
-                delta = -(cur - self.buckets[m][0]) * (1-r*(1-perc**1.5))            
-            self.mf[m//3].params[m%3] += delta
+    def mutate(self,mf,gene,perc=0):
+        self.mf[mf].mutate(gene)
 
     def crossover(self,other):
-        p1 = self.serialize()
-        p2 = other.serialize()
-        c1 = p1[:]
-        c2 = p2[:]
-        for p in range(2,self.num_params-2):
-            xmin,xmax = min(p1[p],p2[p]),max(p1[p],p2[p])
-            bmin,bmax = self.buckets[p]
-            I = xmax - xmin
+        c1,c2 = [],[]
+        for p1,p2 in zip(self.mf,other.mf):
+            c_1,c_2 = p1.crossover(p2)
+            c1.extend(c_1)
+            c2.extend(c_2)
+        return c1,c2
+
+class GenFuzzyMF(MF):
+    def __init__(self,buckets,mfname='',parent=None):
+        self.buckets = buckets
+        params = [random()*(b[1]-b[0]) + b[0] for b in self.buckets]
+        super(GenFuzzyMF,self).__init__(mfname,params,parent)
+
+    def mutate(self,gene,perc=0):
+        r = random()
+        cur = self.params[gene]
+        tau = randint(0,1)
+        if tau:
+            delta = (self.buckets[gene][1] - cur) * (1-r*(1-perc**1.5))
+        else:
+            delta = -(cur - self.buckets[gene][0]) * (1-r*(1-perc**1.5))            
+        self.params[gene] += delta
+
+    def randomize(self):
+        self.params = [random()*(b[1]-b[0]) + b[0] for b in self.buckets]
+
+    def crossover(self,other):
+        c1,c2 = [],[]
+        for p1,p2,b in zip(self.params,other.params,self.buckets):
+            bmin,bmax = b[:]
             R = bmax - bmin
-            lamb = random()
-            new_xmin = xmin - (I/R)*(xmin - bmin)
-            new_xmax = xmax + (I/R)*(bmax - xmax)
-            c1[p] = lamb*new_xmin + (1-lamb)*new_xmax
-            c2[p] = (1-lamb)*new_xmin + lamb*new_xmax
+            if not R:
+                c1.append(p1)
+                c2.append(p2)
+            else:
+                xmin,xmax = min(p1,p2),max(p1,p2)
+                I = xmax - xmin
+                lamb = random()
+                new_xmin = xmin - (I/R)*(xmin - bmin)
+                new_xmax = xmax + (I/R)*(bmax - xmax)
+                c1.append(lamb*new_xmin + (1-lamb)*new_xmax)
+                c2.append((1-lamb)*new_xmin + lamb*new_xmax)
         return c1,c2
 
 class GenFuzzyRuleBase(object):
