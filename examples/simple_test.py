@@ -9,6 +9,7 @@ import sys
 sys.path.append('..')
 from yapflm import FIS
 from gfs import GFS
+import time
 
 # traditional FIS
 fis = FIS()
@@ -63,5 +64,9 @@ gfs3,gfs4 = gfs1.crossover(gfs2)
 input_vals = [2,25]
 input_scales = [10,100]
 input_scaled = [a/b for a,b in zip(input_vals,input_scales)]
-for i in xrange(10000):
+#print fis.evalfis(input_scaled)
+t1 = time.time()
+for i in xrange(int(1e4)):
     fis.evalfis(input_scaled)
+tf = time.time()-t1
+print("{} seconds".format(tf))

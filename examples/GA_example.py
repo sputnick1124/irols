@@ -9,10 +9,12 @@ import sys
 sys.path.append('..')
 from ga import GA
 from gfs import GFS
-from matplotlib import pyplot as plt
+import matplotlib.pyplot as plt
 import numpy as np
 from scipy.integrate import ode
 from multiprocessing import Pool
+
+from fisutils import plot_fis
 #import timeit
 
 def springmass(t,x,fis):
@@ -120,13 +122,13 @@ fn0 = lambda x: x**(0.45)
 fn1 = lambda x: x if -0.8<x<0.8 else -0.8 if x<=-0.8 else 0.8
 fn2 = lambda x: x*x
 fn3 = lambda x: x
-fitness1 = fitness_fn(fn2,0,1)
+fitness1 = fitness_fn(fn1,-1,1)
 
 #ic = [0.2,0]
 
 #myfis = GFS(init=[5,(1<<4)+(1<<0),3,0],inRange=[-13,13],outRange=[-5,120])
 #myfis._points = 1001
-myfis = GFS(5,5,in_ranges=[(-1,1)],out_ranges=[(-1,1)])
+myfis = GFS([5,5],5)#,in_ranges=[(-1,1)],out_ranges=[(-1,1)])
 
 #sim1(myfis.randomize())
 
@@ -137,19 +139,19 @@ myga.add_prototype(myfis)
 #f = results.get()
 #p.close()
 #p.join()
-
-myga.add_fitness(fitness1)
+mod_fit = model_fitness()
+myga.add_fitness(mod_fit)
 best = myga.run()
 
 
-x = np.linspace(0,1,1000)
-#ya = fn1(x)
-ya = map(fn2,x)
-yf = map(best.evalfis,x)
-#yf = [myfis.evalfis(xx) for xx in x]
-
-
-
-plt.plot(x,ya,'b',x,yf,'g--')
-plt.legend(['fn',"Fuzzy Approx"],loc='best')
-plt.show()
+#x = np.linspace(-1,1,1000)
+##ya = fn1(x)
+#ya = map(fn1,x)
+#yf = map(best.evalfis,x)
+##yf = [myfis.evalfis(xx) for xx in x]
+#
+#
+#
+#plt.plot(x,ya,'b',x,yf,'g--')
+#plt.legend(['fn',"Fuzzy Approx"],loc='best')
+#plt.show()

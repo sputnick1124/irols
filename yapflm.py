@@ -138,6 +138,7 @@ class FIS(object):
                                     for i,a in enumerate(ant) if a is not None]
             # Generalize for multiple output systems. Easy
             rulestrength = weight*comb[conn](mfresult)
+#            print(rulestrength)
             for out in xrange(numout):
                 outmf = self.output[out].mf[con[out]].evalmf(rulestrength)
                 ruleout[-1].append(outmf)
@@ -146,6 +147,7 @@ class FIS(object):
 #            agg = [aggMethod([y[i] for y in ruletemp]) for i in xrange(len(ruletemp[0]))]
 #            agg = aggMethod(ruleout,axis=0)
             outs = [y[o] for y in ruleout]
+#            print(outs)
             outputs.append(defuzzMethod(outs))
         return outputs if len(outputs)>1 else outputs[0]
 
