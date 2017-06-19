@@ -10,7 +10,7 @@ from random import triangular
 
 class GA(object):
     def __init__(self,popSize=100,genMax=200,numElite=5,numRecomb=50,
-                 numMut=35,numRand=10,stagnation=10):
+                 numMut=35,numRand=10,stagnation=10,cpus=4):
         popTrial = sum([numElite,numRecomb,numMut,numRand])
         if popTrial != popSize:
             popPer = popSize/popTrial
@@ -28,7 +28,10 @@ class GA(object):
         self.numRand = numRand
         self.stagnation = stagnation
         self.fitness_hist = []
-        self.pool = Pool(4)
+        if cpus > 1:
+            self.pool = Pool(cpus)
+        else:
+            self.pool = None
 
     def add_prototype(self,proto):
         self.proto = proto
@@ -42,9 +45,11 @@ class GA(object):
             ind.randomize()
 
     def eval_population(self):
-        res = self.pool.map_async(self.fitness,self.pop_curr)
-        fitnessvalues = zip(self.pop_curr,res.get())
-#        fitnessvalues = [(ind,self.fitness(ind)) for ind in self.pop_curr]
+        if self.pool is not None:
+            res = self.pool.map_async(self.fitness,self.pop_curr)
+            fitnessvalues = zip(self.pop_curr,res.get())
+        else:
+            fitnessvalues = [(ind,self.fitness(ind)) for ind in self.pop_curr]
         sorted_fitness = zip(*sorted(fitnessvalues,key=itemgetter(1)))
         self.pop_curr = sorted_fitness[0]
         self.fitness_hist.append(sorted_fitness[1][0])
