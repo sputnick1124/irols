@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from __future__ import division
+from __future__ import division, print_function
 from yapflm import FIS, FuzzyVar, FuzzyRule, MF, ParamError
 from operator import mul
 
@@ -7,11 +7,11 @@ from itertools import product
 from random import random, randint, sample
 from copy import deepcopy
 
-def in_range(x,interval):
+def valid_tri(params):
     """
     Helper function to test inclusion of x in interval
     """
-    return interval[0] <= x <= interval[1]
+    return params[0] <= params[1] <= params[2]
 
 class GFS(FIS):
     """
@@ -105,25 +105,34 @@ class GenFuzzyVar(FuzzyVar):
             self.varrange = (0,1)
         else:
             self.varrange = varrange
-        bins = []
-        interval = (self.varrange[1]-self.varrange[0])/(num_mfs-1)
-        # make the 'buckets' in which the params need to reside
-        bins.append((self.varrange[0],self.varrange[0]+interval/2))
-        for mf in range(1,num_mfs-1):
-            bins.append(
-            (self.varrange[0] + interval*mf - interval/2,
-             self.varrange[0] + interval*mf + interval/2))
-        bins.append((self.varrange[1] - interval/2, self.varrange[1]))
-        # assign a bucket to each of the params
-        buckets = [(self.varrange[0],)*2]*2 + [bins[1]]        
-        for p in range(1,len(bins)-1):
-            buckets.append(bins[p-1])
-            buckets.append(bins[p])
-            buckets.append(bins[p+1])
-        buckets.append(bins[-2])
-        buckets.extend([(self.varrange[1],)*2]*2)
-        for b in range(self.num_mfs):
-            self.addmf('',buckets[b*3:b*3+3],self)
+        if 1:#vartype:
+            interval = (self.varrange[1]-self.varrange[0])/(num_mfs-1)
+            bins = []
+            # make the 'buckets' in which the params need to reside
+            bins.append((self.varrange[0],self.varrange[0]+interval/2))
+            for mf in range(1,num_mfs-1):
+                lo = self.varrange[0] + interval*mf - interval/2
+                if abs(lo) < 1e-10:
+                    lo = 0
+                hi = self.varrange[0] + interval*mf + interval/2
+                if abs(hi) < 1e-10:
+                    hi = 0
+                bins.append((lo,hi))
+            bins.append((self.varrange[1] - interval/2, self.varrange[1]))
+            # assign a bucket to each of the params
+            buckets = [(self.varrange[0],)*2]*2 + [bins[1]]        
+            for p in range(1,len(bins)-1):
+                buckets.append(bins[p-1])
+                buckets.append(bins[p])
+                buckets.append(bins[p+1])
+            buckets.append(bins[-2])
+            buckets.extend([(self.varrange[1],)*2]*2)
+            for b in range(self.num_mfs):
+                self.addmf('',buckets[b*3:b*3+3],self)
+        else:
+            buckets = [None,(self.varrange[0],self.varrange[1])]
+            for b in range(self.num_mfs):
+                self.addmf('',buckets,self)
 
     def serialize(self):
         return sum([mf.params for mf in self.mf],[])
@@ -138,7 +147,7 @@ class GenFuzzyVar(FuzzyVar):
 
     def addmf(self,mfname,buckets,parent=None):
         try:
-            mf = GenFuzzyMF(buckets,mfname,parent)
+            mf = GenFuzzyMF(mfname,buckets,parent)
         except ParamError as e:
             raise(e)
         self.mf.append(mf)
@@ -160,40 +169,102 @@ class GenFuzzyVar(FuzzyVar):
         return c1,c2
 
 class GenFuzzyMF(MF):
-    def __init__(self,buckets,mfname='',parent=None):
-        self.buckets = buckets
-        params = [random()*(b[1]-b[0]) + b[0] for b in self.buckets]
+    def __init__(self,mfname='',buckets=None,parent=None):
+        if buckets is not None:
+            self.buckets = buckets
+        else:
+            pass #throw error
+        if buckets[0] is None: #must be an output, let mfs float
+            params = sorted([random()*(buckets[1][1]-buckets[1][0])+buckets[1][0] for _ in range(3)])
+        else:
+            params = [random()*(b[1]-b[0]) + b[0] for b in self.buckets]
         super(GenFuzzyMF,self).__init__(mfname,params,parent)
 
     def mutate(self,gene,perc=0):
         r = random()
         cur = self.params[gene]
         tau = randint(0,1)
-        if tau:
-            delta = (self.buckets[gene][1] - cur) * (1-r*(1-perc**1.5))
+        b = 0
+        if self.buckets[0] is not None:
+            if tau:
+                delta = (self.buckets[gene][1] - cur) * (1-r*(1-perc**b))
+            else:
+                delta = -(cur - self.buckets[gene][0]) * (1-r*(1-perc**b))
         else:
-            delta = -(cur - self.buckets[gene][0]) * (1-r*(1-perc**1.5))            
+            top = self.params[gene+1] if gene != 2 else self.buckets[1][1]
+            bot = self.params[gene-1] if gene != 0 else self.buckets[1][0]
+            if tau:
+                delta = (top - cur) * r*(1 - (1-perc**b))
+            else:
+                delta = -(cur - bot) * r*(1 - (1-perc**b))
         self.params[gene] += delta
+        if not valid_tri(self.params):
+            print("Mutation: ",end='')
+            print("tau=",tau,"delta=",delta,"cur=",cur,"params=",self.params)
+            if self.buckets[0] is not None:
+                print("bucket=",self.buckets[gene])
+            else:
+                print("top=",top,"bot=",bot)
 
     def randomize(self):
-        self.params = [random()*(b[1]-b[0]) + b[0] for b in self.buckets]
+        if self.buckets[0] is None:
+            self.params = sorted([random()*(self.buckets[1][1]-self.buckets[1][0])+self.buckets[1][0] for _ in range(3)])
+            if not valid_tri(self.params):
+                print('INPUT:')
+                print(self.params)
+        else:
+            self.params = [random()*(b[1]-b[0]) + b[0] for b in self.buckets]
+            if not valid_tri(self.params):
+                print('OUTPUT:')
+                print(self.params)
 
     def crossover(self,other):
-        c1,c2 = [],[]
-        for p1,p2,b in zip(self.params,other.params,self.buckets):
-            bmin,bmax = b[:]
-            R = bmax - bmin
-            if not R:
-                c1.append(p1)
-                c2.append(p2)
-            else:
-                xmin,xmax = min(p1,p2),max(p1,p2)
-                I = xmax - xmin
-                lamb = random()
-                new_xmin = xmin - (I/R)*(xmin - bmin)
-                new_xmax = xmax + (I/R)*(bmax - xmax)
-                c1.append(lamb*new_xmin + (1-lamb)*new_xmax)
-                c2.append((1-lamb)*new_xmin + lamb*new_xmax)
+        blended = random #function alias
+        uniform = lambda:randint(0,1) #function alias
+        selection = uniform #method selector
+        if self.buckets[0] is not None:
+            c1,c2 = [],[]
+            for p1,p2,b in zip(self.params,other.params,self.buckets):
+                bmin,bmax = b[:]
+                R = bmax - bmin
+                if not R:
+                    c1.append(p1)
+                    c2.append(p2)
+                else:
+                    xmin,xmax = min(p1,p2),max(p1,p2)
+                    I = 0#xmax - xmin
+                    lamb = selection()
+                    new_xmin = xmin - (I/R)*(xmin - bmin)
+                    new_xmax = xmax + (I/R)*(bmax - xmax)
+                    c1.append(lamb*new_xmin + (1-lamb)*new_xmax)
+                    c2.append((1-lamb)*new_xmin + lamb*new_xmax)
+            if not valid_tri(c1) or not valid_tri(c2):
+                print('INPUT:')
+                print(self.buckets)
+                print(self.params,other.params)
+                print(c1,c2)
+        else:
+            c1,c2 = [None]*3,[None]*3
+#            print("Parents: ",self.params,other.params)
+            for i in [1,0,2]:
+                p1,p2 = self.params[i],other.params[i]
+                if i == 1:
+                    xmin,xmax = min(p1,p2),max(p1,p2)
+                elif i == 0:
+                    xmin = min(p1,p2)
+                    xmax = min(self.params[i+1],other.params[i+1])
+                elif i == 2:
+                    xmin = max(self.params[i-1],other.params[i-1])
+                    xmax = max(p1,p2)
+
+                lamb = selection()
+                c1[i] = lamb*xmin + (1-lamb)*xmax
+                c2[i] = (1-lamb)*xmin + lamb*xmax
+#                print(i,": ",c1,c2,self.buckets)
+            if not valid_tri(c1) or not valid_tri(c2):
+                print('OUTPUT:')
+                print(self.params,other.params)
+                print(c1,c2)
         return c1,c2
 
 class GenFuzzyRuleBase(object):
