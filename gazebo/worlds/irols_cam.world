@@ -24,7 +24,7 @@
       <uri>model://asphalt_plane</uri>
     </include>
     <physics name='default_physics' default='0' type='ode'>
-      <gravity>0 0 -9.8066</gravity>
+      <!--gravity>0 0 -9.8066</gravity-->
       <ode>
         <solver>
           <!--type>quick</type-->
@@ -42,7 +42,7 @@
       <max_step_size>0.001</max_step_size>
       <real_time_factor>1</real_time_factor>
       <real_time_update_rate>1000</real_time_update_rate>
-      <magnetic_field>6e-06 2.3e-05 -4.2e-05</magnetic_field>
+      <!--magnetic_field>6e-06 2.3e-05 -4.2e-05</magnetic_field-->
     </physics>
   </world>
 </sdf>

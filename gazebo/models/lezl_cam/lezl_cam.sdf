@@ -9,7 +9,6 @@
       <uri>model://camera</uri>
       <pose>0 0 0 0 1.5708 0</pose>
     </include>
-
     <joint name="camera_joint" type="revolute">
       <child>camera::camera_link</child>
       <parent>lezl::base_link</parent>
@@ -21,7 +20,5 @@
         </limit>
       </axis>
     </joint>
-    
-
   </model>
 </sdf>

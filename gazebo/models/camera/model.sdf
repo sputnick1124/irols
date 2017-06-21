@@ -3,7 +3,8 @@
   <model name="camera">
     <link name="camera_link">
       <inertial>
-        <pose>0 0 0.025 0 -0 0</pose>
+        <pose>0 0 -0.162 0 -0 0</pose>
+        <!--pose>0 0 0.025 0 -0 0</pose-->
         <mass>0.01</mass>
         <inertia>
           <ixx>4.15e-6</ixx>
@@ -21,6 +22,9 @@
           </box>
         </geometry>
       </visual>
+      <sensor name="lezl_cam_imu" type="imu">
+        <always_on>1</always_on>
+      </sensor>
       <sensor name="camera1" type="camera">
         <camera>
           <horizontal_fov>0.84479790990252</horizontal_fov>
