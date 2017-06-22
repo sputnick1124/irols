@@ -25,8 +25,8 @@
     <plugin name='gimbal_controller' filename='librotors_gazebo_gimbal_controller_plugin.so'>
       <joint_yaw>camera_gimbal::cgo3_vertical_arm_joint</joint_yaw>
       <joint_roll>camera_gimbal::cgo3_horizontal_arm_joint</joint_roll>
-      <joint_pitch>camera_gimbal::camera_joint</joint_pitch>
-      <imu>camera_gimbal::lezl_cam_imu</imu>
+      <joint_pitch>camera_gimbal::cgo3_camera_joint</joint_pitch>
+      <imu>lezl_cam_imu</imu>
     </plugin>
 
   </model>
