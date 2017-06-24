@@ -436,6 +436,7 @@
           <zero_position_disarmed>0</zero_position_disarmed>
           <zero_position_armed>100</zero_position_armed>
           <joint_control_type>velocity</joint_control_type>
+          <joint_name>rotor_0_joint</joint_name>
         </channel>
         <channel name='rotor2'>
           <input_index>1</input_index>
@@ -444,6 +445,7 @@
           <zero_position_disarmed>0</zero_position_disarmed>
           <zero_position_armed>100</zero_position_armed>
           <joint_control_type>velocity</joint_control_type>
+          <joint_name>rotor_1_joint</joint_name>
         </channel>
         <channel name='rotor3'>
           <input_index>2</input_index>
@@ -452,6 +454,7 @@
           <zero_position_disarmed>0</zero_position_disarmed>
           <zero_position_armed>100</zero_position_armed>
           <joint_control_type>velocity</joint_control_type>
+          <joint_name>rotor_2_joint</joint_name>
         </channel>
         <channel name='rotor4'>
           <input_index>3</input_index>
@@ -460,9 +463,10 @@
           <zero_position_disarmed>0</zero_position_disarmed>
           <zero_position_armed>100</zero_position_armed>
           <joint_control_type>velocity</joint_control_type>
+          <joint_name>rotor_3_joint</joint_name>
         </channel>
         <channel name="gimbal_roll">
-          <input_index>6</input_index>
+          <input_index>4</input_index>
           <input_offset>0</input_offset>
           <input_scaling>-3.1415</input_scaling>
           <zero_position_disarmed>0</zero_position_disarmed>
@@ -472,7 +476,7 @@
           <joint_name>camera_gimbal::cgo3_camera_joint</joint_name>
         </channel>
         <channel name="gimbal_pitch">
-          <input_index>7</input_index>
+          <input_index>5</input_index>
           <input_offset>0</input_offset>
           <input_scaling>3.1415</input_scaling>
           <zero_position_disarmed>0</zero_position_disarmed>
@@ -481,8 +485,9 @@
           <gztopic>/gimbal_pitch_cmd</gztopic>
           <joint_name>camera_gimbal::cgo3_camera_joint</joint_name>
         </channel>
+<!--
         <channel name="gimbal_yaw">
-          <input_index>8</input_index>
+          <input_index>6</input_index>
           <input_offset>-0.5</input_offset>
           <input_scaling>-3.1415</input_scaling>
           <zero_position_disarmed>0</zero_position_disarmed>
@@ -491,7 +496,7 @@
           <gztopic>/gimbal_yaw_cmd</gztopic>
           <joint_name>camera_gimbal::cgo3_vertical_arm_joint</joint_name>
         </channel>
-
+-->
       </control_channels>
     </plugin>
     <static>0</static>

@@ -94,27 +94,36 @@
       -->
       <axis>
         <xyz>0 0 1</xyz>
+<!--
         <limit>
           <lower>-1e16</lower>
           <upper>1e16</upper>
           <effort>100</effort>
           <velocity>-1</velocity>
         </limit>
+-->
+        <limit>
+          <lower>0</lower>
+          <upper>0</upper>
+        </limit>
+<!--
         <dynamics>
           <damping>0.1</damping>
         </dynamics>
         <use_parent_model_frame>1</use_parent_model_frame>
+-->
       </axis>
+<!--
       <physics>
         <ode>
           <implicit_spring_damper>1</implicit_spring_damper>
           <limit>
-            <!-- testing soft limits -->
             <cfm>0.1</cfm>
             <erp>0.2</erp>
           </limit>
         </ode>
       </physics>
+-->
     </joint>
     <link name="cgo3_horizontal_arm_link">
       <inertial>
@@ -207,10 +216,11 @@
           </script>
         </material>
       </visual>
-      <sensor name="lezl_cam_imu" type="imu">
+      <sensor name="camera_imu" type="imu">
         <always_on>1</always_on>
       </sensor>
       <sensor name="camera1" type="camera">
+        <pose frame=''>-0.051 0 -0.162 0 0 3.14159</pose>
         <camera>
           <horizontal_fov>0.84479790990252</horizontal_fov>
           <image>
@@ -233,6 +243,7 @@
         <cameraName>camera1</cameraName>
         <imageTopicName>image_raw</imageTopicName>
         <cameraInfoTopicName>camera_info</cameraInfoTopicName>
+        <frameName>cg03_camera_sensor_frame</frameName>
         <frameName>camera_link</frameName>
         <hackBaseline>0.07</hackBaseline>
         <distortionK1>0.0</distortionK1>
