@@ -3,13 +3,13 @@
     <arg name="headless" default="false"/>
     <include file="$(find px4)/launch/mavros_posix_sitl.launch">
         <arg name="rcS" value="$(find irols)/configs/lezl" />
-        <arg name="sdf" value="$(find irols)/gazebo/models/lezl_cam/lezl_cam.sdf" />
+        <arg name="sdf" value="$(find irols)/gazebo/models/lezl_gimbal/lezl_gimbal.sdf" />
         <arg name="world" value="$(find irols)/gazebo/worlds/irols_cam.world" />
         <arg name="gui" value="$(arg gui)"/>
         <arg name="headless" value="$(arg headless)"/>
     </include>
 
-    <include file="$(find irols)/launch/irols.launch"/>
+    <!--include file="$(find irols)/launch/irols.launch"/-->
     <include file="$(find irols)/launch/image_pipeline.launch"/>
     <include file="$(find irols)/launch/apriltags_ros.launch"/>
 
