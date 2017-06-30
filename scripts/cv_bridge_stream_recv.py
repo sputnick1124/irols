@@ -77,7 +77,7 @@ class Image_Processor(object):
     yel_hi = (30,255,255)
     mask = cv2.inRange(hsv,yel_lo,yel_hi)
     _,cnts,heir = cv2.findContours(mask,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
-    print(cnts)
+#    print(cnts)
     if not len(cnts):
         return data,None,None,None
     target = sorted(cnts,key=lambda c:cv2.contourArea(c))[-1]
@@ -90,7 +90,7 @@ class Image_Processor(object):
         dist = 0.255*2*self.fy/diam
     self.dz = self.pose.position.z #cheat for now
 #    self.dz = dist
-    print(self.dz,diam)
+#    print(self.dz,dist)
     if dist < 3:
         im = self.bridge.cv2_to_imgmsg(data, encoding="passthrough")
         self.landing_pub.publish(im)
@@ -98,15 +98,17 @@ class Image_Processor(object):
     if not M["m00"]:
         return mask,None, None,None
     Pi = np.matrix((M["m10"]/M["m00"],M["m01"]/M["m00"],1)).T
+#    print(Pi.T)
     Pc = self.K.I*Pi
     Pc = Pc/Pc[2] * dist
-    o = self.pose.orientation
-    q = [o.x,o.y,o.z,o.w]
-    r,p,y = efq(q)
-    R = np.matrix(eul_mat(y,p,r,axes='rzxy'))[:3,:3]
-    Pr = R*Pc
-    self.dx = -Pr[0]
-    self.dy = -Pr[1]
+#    print(Pc.T)
+#    o = self.pose.orientation
+#    q = [o.x,o.y,o.z,o.w]
+#    r,p,y = efq(q)
+#    R = np.matrix(eul_mat(y,p,r,axes='rzxy'))[:3,:3]
+#    Pr = R*Pc
+    self.dx = -Pc[0]
+    self.dy = Pc[1]
     
     ct = ((M["m10"]/M["m00"]),(M["m01"]/M["m00"]))
     ci = ((data.shape[0]/2),(data.shape[1]/2))

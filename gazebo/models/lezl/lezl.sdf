@@ -18,7 +18,7 @@
         <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <box>
-            <size>0.47 0.47 0.11</size>
+            <size>0.47 0.47 0.37</size>
           </box>
         </geometry>
         <surface>
@@ -34,11 +34,11 @@
         </surface>
       </collision>
       <visual name='base_link_inertia_visual'>
-        <pose frame=''>0 0 0 0 -0 0</pose>
+        <pose frame=''>0.018 -0.0265 0 1.57 -0 0</pose>
         <geometry>
           <mesh>
-            <scale>1 1 1</scale>
-            <uri>model://rotors_description/meshes/iris.stl</uri>
+            <scale>0.001 0.001 0.001</scale>
+            <uri>model://lezl/meshes/f450_frame.stl</uri>
           </mesh>
         </geometry>
         <material>
@@ -86,7 +86,8 @@
       </axis>
     </joint>
     <link name='rotor_0'>
-      <pose frame=''>0.13 -0.22 0.023 0 -0 0</pose>
+      <!--pose frame=''>0.13 -0.22 0.023 0 -0 0</pose-->
+      <pose frame=''>0.162 -0.162 0.007 0 -0 0</pose>
       <inertial>
         <pose frame=''>0 0 0 0 -0 0</pose>
         <mass>0.005</mass>
@@ -117,11 +118,11 @@
         </surface>
       </collision>
       <visual name='rotor_0_visual'>
-        <pose frame=''>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 1.57 -0 0</pose>
         <geometry>
           <mesh>
-            <scale>1 1 1</scale>
-            <uri>model://rotors_description/meshes/iris_prop_ccw.dae</uri>
+            <scale>0.001 0.001 0.001</scale>
+            <uri>model://lezl/meshes/f450_prop_ccw.stl</uri>
           </mesh>
         </geometry>
         <material>
@@ -152,7 +153,7 @@
       </axis>
     </joint>
     <link name='rotor_1'>
-      <pose frame=''>-0.13 0.2 0.023 0 -0 0</pose>
+      <pose frame=''>-0.162 0.162 0.007 0 -0 0</pose>
       <inertial>
         <pose frame=''>0 0 0 0 -0 0</pose>
         <mass>0.005</mass>
@@ -183,11 +184,11 @@
         </surface>
       </collision>
       <visual name='rotor_1_visual'>
-        <pose frame=''>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 1.57 -0 0</pose>
         <geometry>
           <mesh>
-            <scale>1 1 1</scale>
-            <uri>model://rotors_description/meshes/iris_prop_ccw.dae</uri>
+            <scale>0.001 0.001 0.001</scale>
+            <uri>model://lezl/meshes/f450_prop_ccw.stl</uri>
           </mesh>
         </geometry>
         <material>
@@ -218,7 +219,7 @@
       </axis>
     </joint>
     <link name='rotor_2'>
-      <pose frame=''>0.13 0.22 0.023 0 -0 0</pose>
+      <pose frame=''>0.162 0.162 0.007 0 -0 0</pose>
       <inertial>
         <pose frame=''>0 0 0 0 -0 0</pose>
         <mass>0.005</mass>
@@ -249,11 +250,11 @@
         </surface>
       </collision>
       <visual name='rotor_2_visual'>
-        <pose frame=''>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 1.57 -0 0</pose>
         <geometry>
           <mesh>
-            <scale>1 1 1</scale>
-            <uri>model://rotors_description/meshes/iris_prop_cw.dae</uri>
+            <scale>0.001 0.001 0.001</scale>
+            <uri>model://lezl/meshes/f450_prop_cw.stl</uri>
           </mesh>
         </geometry>
         <material>
@@ -284,7 +285,7 @@
       </axis>
     </joint>
     <link name='rotor_3'>
-      <pose frame=''>-0.13 -0.2 0.023 0 -0 0</pose>
+      <pose frame=''>-0.162 -0.162 0.007 0 -0 0</pose>
       <inertial>
         <pose frame=''>0 0 0 0 -0 0</pose>
         <mass>0.005</mass>
@@ -315,11 +316,11 @@
         </surface>
       </collision>
       <visual name='rotor_3_visual'>
-        <pose frame=''>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0 1.57 -0 0</pose>
         <geometry>
           <mesh>
-            <scale>1 1 1</scale>
-            <uri>model://rotors_description/meshes/iris_prop_cw.dae</uri>
+            <scale>0.001 0.001 0.001</scale>
+            <uri>model://lezl/meshes/f450_prop_cw.stl</uri>
           </mesh>
         </geometry>
         <material>
