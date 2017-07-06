@@ -24,7 +24,7 @@ class CameraMover(object):
         self.srv = Server(moveCamConfig,self.set_model_state)
 
     def set_model_state(self,config,level):
-        model_state = ModelState(model_name='camera_static')
+        model_state = ModelState(model_name='lezl_cam')
         x = config['x']
         y = config['y']
         z = config['z']
@@ -35,7 +35,7 @@ class CameraMover(object):
         model_state.pose.position.y = y
         model_state.pose.position.z = z
 #        R = np.matrix(eul_mat(0,1.57,0,'rzxy'))
-        q = qfe(phi,theta,psi,'rxyx')
+        q = qfe(phi,theta,psi,'sxyz')
         model_state.pose.orientation.x = q[0]
         model_state.pose.orientation.y = q[1]
         model_state.pose.orientation.z = q[2]
@@ -62,11 +62,9 @@ class Homographer(object):
             cv2.waitKey(3)
         else:
             im = cv2.bitwise_and(im,im,mask=mask)
-            imline = cv2.line(im,(int(ci[0]),int(ci[1])),(int(ct[0]),int(ct[1])),(0,0,255))
+            cv2.line(im,(int(ci[0]),int(ci[1])),(int(ct[0]),int(ct[1])),(0,0,255))
             cv2.imshow('from_cam',im)
             cv2.waitKey(3)
-    #    self.heading_pub.publish(self.heading)
-    #    self.camera_info_pub.publish(self.cam_info)
 
     def detect_target(self,data):
         hsv = cv2.cvtColor(data,cv2.COLOR_BGR2HSV)
@@ -91,18 +89,20 @@ class Homographer(object):
         M = cv2.moments(target)
         if not M["m00"]:
             return mask,None, None,None
-        Pi = np.matrix((M["m10"]/M["m00"],M["m01"]/M["m00"],1)).T
+        Pi = np.matrix((M["m10"]/M["m00"],M["m01"]/M["m00"],1)).T # point in image coords
         Pc = self.K.I*Pi
         Pc = Pc/Pc[2] * dist
         Pc[1] *= -1
         o = self.cam_mover.pose.orientation
         q = [o.x,o.y,o.z,o.w]
-        r,p,y = efq(q,'rxyx')
-        p -= 1.57
-        R = np.matrix(eul_mat(y,p,-r,axes='rzxy'))[:3,:3]
-        #R = np.matrix(eul_mat(r,p,y))[:3,:3]
-        L = np.diag([1,1,-1])
-        Pr = R*L*Pc
+        r,p,y = efq(q,'sxyz')
+#        p -= 1.57
+        #R = np.matrix(eul_mat(y,p,-r,axes='rzxy'))[:3,:3]
+        Ri_b = np.matrix(eul_mat(0,0,-1.57))[:3,:3]
+        R = np.matrix(eul_mat(r,p,-y))[:3,:3]
+#        L = np.diag([1,1,1])
+#        Pr = R.T*L*Pc
+        Pr = R*Ri_b.T*Pc
         self.dx = Pr[0]
         self.dy = -Pr[1]
         print('dx',float(Pr[0]),' dy',float(Pr[1]),'rpy',r,p,-y)

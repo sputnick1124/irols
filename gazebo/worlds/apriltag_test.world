@@ -10,8 +10,8 @@
       <uri>model://ground_plane</uri>
     </include>
     <include>
-      <uri>model://camera_static</uri>
-      <pose>0 0 0.5 0 1.57 0</pose>
+      <uri>model://lezl_cam</uri>
+      <pose>0 0 0.5 0 0 0</pose>
     </include>
     <include>
       <uri>model://landing_pad</uri>
@@ -22,5 +22,6 @@
       <uri>model://asphalt_plane</uri>
     </include>
     <-->
+    <gravity>0 0 0</gravity>
   </world>
 </sdf>

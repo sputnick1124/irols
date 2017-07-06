@@ -1,12 +1,18 @@
 <launch>
 
-	<arg name="world_name" value="$(find irols)/gazebo/worlds/apriltag_test.world"/>
+	<arg name="world_name" default="$(find irols)/gazebo/worlds/apriltag_test.world"/>
+	<arg name="gui" default="true"/>
+	<arg name="headless" default="false"/>
 	<include file="$(find gazebo_ros)/launch/empty_world.launch">
         <arg name="world_name" value="$(arg world_name)"/>
+	<arg name="gui" value="$(arg gui)"/>
+	<arg name="headless" default="$(arg headless)"/>
     </include>
 	<include file="$(find irols)/launch/image_pipeline.launch"/>
 	<include file="$(find irols)/launch/apriltags_ros.launch"/>
     <!--node pkg="irols" type="homography_test.py" name="homography"/-->
     <node pkg="rqt_reconfigure" type="rqt_reconfigure" name="rqt_reconfigure"/>
+
+    <node pkg="px4" name="px4_sitl" type="px4" args="$(find px4) $(find irols)/configs/lezl" output="screen"/>
     <node pkg="rqt_image_view" type="rqt_image_view" name="rqt_image_view"/>
 </launch>
