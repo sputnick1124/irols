@@ -15,7 +15,6 @@ from numpy import sign
 
 class Controller(object):
 	def __init__(self):
-		rospy.init_node('controller')
 		self.timer = None
 		self.state_sub = rospy.Subscriber('/lezl/state',TwistStamped,self.calc_error)
 		self.landed_pub = rospy.Publisher('lezl/landed',Bool,queue_size=10)
@@ -184,6 +183,7 @@ class Fuzzy(Controller):
 
 
 if __name__ == "__main__":
+	rospy.init_node('controller')
 #	Kp = (0.8,0.8,0.8,10)
 	Kp = [5,5,1.2,4]
 	Kd = [0.02,0.02,0.01,0.03]

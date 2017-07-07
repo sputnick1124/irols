@@ -90,19 +90,19 @@ class Homographer(object):
         if not M["m00"]:
             return mask,None, None,None
         Pi = np.matrix((M["m10"]/M["m00"],M["m01"]/M["m00"],1)).T # point in image coords
-        Pc = self.K.I*Pi
-        Pc = Pc/Pc[2] * dist
-        Pc[1] *= -1
+        Pc = self.K.I*Pi # point in world units (still on sensor)
+        Pc = Pc/Pc[2] * dist # point projected onto ground plane
+        Pc[1] *= -1 # account for image coordinates astarting in top left
         o = self.cam_mover.pose.orientation
         q = [o.x,o.y,o.z,o.w]
         r,p,y = efq(q,'sxyz')
 #        p -= 1.57
         #R = np.matrix(eul_mat(y,p,-r,axes='rzxy'))[:3,:3]
-        Ri_b = np.matrix(eul_mat(0,0,-1.57))[:3,:3]
-        R = np.matrix(eul_mat(r,p,-y))[:3,:3]
+        Rcam_body = np.matrix(eul_mat(0,0,-1.57))[:3,:3]
+        Rbody_inert = np.matrix(eul_mat(r,p,-y))[:3,:3]
 #        L = np.diag([1,1,1])
 #        Pr = R.T*L*Pc
-        Pr = R*Ri_b.T*Pc
+        Pr = Rbody_inert*Rcam_body.T*Pc
         self.dx = Pr[0]
         self.dy = -Pr[1]
         print('dx',float(Pr[0]),' dy',float(Pr[1]),'rpy',r,p,-y)
