@@ -1,0 +1,11 @@
+<launch>
+    <include file="$(find irols)/launch/webcam.launch"/>
+
+    <include file="$(find irols)/launch/apriltags_ros.launch">
+        <arg name="camera_name" value="camera"/>
+    </include>
+
+    <include file="$(find irols)/launch/image_pipeline.launch">
+        <arg name="ns" value="camera"/>
+    </include>
+</launch>
