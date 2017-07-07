@@ -1,6 +1,7 @@
 <launch>
-    <group ns="camera1">
+    <arg name="ns" default="camera1"/>
+    <group ns="$(arg ns)">
 	<node pkg="image_proc" type="image_proc" name="image_proc"/>
     </group>
-    <remap from="/camera1/camera_info" to="/landing_pad/camera_info" />
+    <remap from="$(arg ns)/camera_info" to="/landing_pad/camera_info" />
 </launch>
