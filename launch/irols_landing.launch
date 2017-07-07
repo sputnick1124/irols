@@ -6,7 +6,7 @@
         <env name="PX4_HOME_LON" value="-84.392328"/>
         <env name="PX4_HOME_ALT" value="313"/>
         <arg name="rcS" value="$(find irols)/configs/lezl" />
-        <arg name="sdf" value="$(find irols)/gazebo/models/lezl_gimbal/lezl_gimbal.sdf" />
+        <arg name="sdf" value="$(find irols)/gazebo/models/lezl_cam/lezl_cam.sdf" />
         <arg name="z" value="0.01"/>
         <arg name="world" value="$(find irols)/gazebo/worlds/irols_cam.world" />
         <arg name="vehicle" value="lezl"/>

@@ -1,6 +1,22 @@
 <launch>
-	<node pkg="irols" type="cv_bridge_stream_recv.py" name="cam_stream"/>
-	<node pkg="irols" type="lezl_follow.py" name="lezl_node"/>
-	<node pkg="irols" type="controller.py" name="controller_node"/>
+	<node pkg="irols" type="vision_estimator.py" name="vision_estimator" output="screen"/>
+	<node pkg="irols" type="apriltag_estimator.py" name="apriltag_estimator" output="screen"/>
+	<node pkg="irols" type="gps_set.py" name="lezl" output="screen"/>
+
+    <node pkg="robot_pose_ekf" type="robot_pose_ekf" name="robot_pose_ekf">
+        <param name="output_frame" value="odom"/>
+        <param name="freq" value="30.0"/>
+        <param name="sensor_timeout" value="0.00001"/>
+        <param name="odom_used" value="true"/>
+        <param name="imu_used" value="true"/>
+        <param name="vo_used" value="true"/>
+        <param name="debug" value="false"/>
+        <param name="self_diagnose" value="false"/>
+
+        <remap from="odom" to="vision_estimate"/>
+        <remap from="vo" to="apriltag_estimate"/>
+        <remap from="imu_data" to="mavros/imu/data"/>
+    </node>
+
     <node pkg="rqt_image_view" type="rqt_image_view" name="image_viewer" args="/camera1/image_raw"/>
 </launch>
