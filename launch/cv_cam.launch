@@ -1,0 +1,9 @@
+<launch>
+  <node name="camera" pkg="cv_camera" type="cv_camera_node" output="screen" >
+    <param name="device_id" value="0" />
+    <param name="image_width" value="640" />
+    <param name="image_height" value="480" />
+    <param name="frame_id" value="camera" />
+    <param name="camera_info_url" value="file://$(find irols)/configs/camera.yaml"/>
+  </node>
+</launch>
