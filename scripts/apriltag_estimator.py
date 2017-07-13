@@ -29,6 +29,7 @@ class ApriltagEstimator(object):
                 covariance=self.cov)
             odom = Odometry(pose=pose_w_cov)
             odom.header.stamp = rospy.Time.now()
+            odom.header.frame_id = 'map'
             self.odom_pub.publish(odom)
         else:
             # no tag, so no estimate update

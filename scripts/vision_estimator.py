@@ -116,6 +116,7 @@ class VisEstimator(object):
             covariance=self.cov)
         odom = Odometry(pose=pose_w_cov)
         odom.header.stamp = rospy.Time.now()
+        odom.header.frame_id = 'odom'
         self.odom_pub.publish(odom)
         
         ci = ((data.shape[0]/2),(data.shape[1]/2))
