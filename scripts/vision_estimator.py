@@ -37,12 +37,12 @@ class VisEstimator(object):
             'vision_estimate',
             Odometry,
             queue_size=10)
-        self.cov = [1, 0, 0, 0, 0, 0,
-                    0, 1, 0, 0, 0, 0,
-                    0, 0, 1, 0, 0, 0,
-                    0, 0, 0, 99999, 0, 0,
-                    0, 0, 0, 0, 99999, 0,
-                    0, 0, 0, 0, 0, 99999]
+        self.cov = [0.5, 0, 0, 0, 0, 0,
+                    0, 0.5, 0, 0, 0, 0,
+                    0, 0, 0.5, 0, 0, 0,
+                    0, 0, 0, 1, 0, 0,
+                    0, 0, 0, 0, 1, 0,
+                    0, 0, 0, 0, 0, 1]
                 
         # Set up camera stuff
         self.bridge = CvBridge()
@@ -98,7 +98,7 @@ class VisEstimator(object):
         o = self.orientation
         q = [o.x,o.y,o.z,o.w]
         r,p,y = efq(q,'sxyz')
-        Rcam_body = np.matrix(eul_mat(0,0,-1.57))[:3,:3]
+        Rcam_body = np.matrix(eul_mat(3.14,0,0))[:3,:3]
         Rbody_inert = np.matrix(eul_mat(r,p,-y))[:3,:3]
         Pr = Rbody_inert*Rcam_body.T*Pc
         dx = Pr[0]

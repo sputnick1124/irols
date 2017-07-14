@@ -5,6 +5,10 @@ from gazebo_msgs.msg import ModelStates
 from nav_msgs.msg import Odometry
 from geometry_msgs.msg import Pose
 
+from tf.transformations import quaternion_matrix as qm
+
+import numpy as np
+
 class Comparator(object):
     def __init__(self):
         self.odom_sub = rospy.Subscriber('vision_estimate',
@@ -28,9 +32,15 @@ class Comparator(object):
         lezl = data.name.index('lezl')
         l_true = data.pose[lezl]
         p_true = data.pose[p3at]
-        self.true.position.x = l_true.position.x-p_true.position.x
-        self.true.position.y = l_true.position.y-p_true.position.y
-        self.true.position.z = l_true.position.z-p_true.position.z
+        o = l_true.orientation
+        Rw_b = np.matrix(qm([o.x,o.y,o.z,o.w]))[:3,:3]
+        y = -(l_true.position.x-p_true.position.x)
+        x = l_true.position.y-p_true.position.y
+        z = l_true.position.z-p_true.position.z
+        x,y,z = Rw_b.T*np.matrix([x,y,z]).T
+        self.true.position.x = float(x)
+        self.true.position.y = float(y)
+        self.true.position.z = float(z)
     
     def run(self):
         rate = rospy.Rate(10)
