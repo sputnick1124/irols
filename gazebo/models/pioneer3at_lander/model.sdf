@@ -24,7 +24,7 @@
       </axis>
     </joint>
     <plugin name="skid_steer_drive_controller" filename="libgazebo_ros_skid_steer_drive.so">
-      <updateRate>1000.0</updateRate>
+      <updateRate>20.0</updateRate>
       <robotNamespace>p3at</robotNamespace>
       <leftFrontJoint>pioneer3at::left_front</leftFrontJoint>
       <rightFrontJoint>pioneer3at::right_front</rightFrontJoint>
@@ -37,7 +37,7 @@
       <commandTopic>cmd_vel</commandTopic>
       <odometryTopic>odom</odometryTopic>
       <odometryFrame>odom</odometryFrame>
-      <broadcastTF>false</broadcastTF>
+      <broadcastTF>true</broadcastTF>
     </plugin>
 
   </model>
