@@ -1,7 +1,10 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(irols)
 
-find_package(catkin REQUIRED COMPONENTS
+find_package(catkin REQUIRED #COMPONENTS
+  genmsg
+  actionlib_msgs
+  actionlib
   roscpp
   rospy
   std_msgs
@@ -40,11 +43,13 @@ find_package(catkin REQUIRED COMPONENTS
 # )
 
 ## Generate actions in the 'action' folder
-# add_action_files(
-#   FILES
-#   Action1.action
-#   Action2.action
-# )
+add_action_files(
+  DIRECTORY action
+  FILES
+  DoArm.action
+)
+
+generate_messages(DEPENDENCIES actionlib_msgs geometry_msgs std_msgs)
 
 ## Generate added messages and services with any dependencies listed here
 
@@ -83,7 +88,7 @@ catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES offboard
 #  CATKIN_DEPENDS geometry_msgs
-#  DEPENDS system_lib
+ DEPENDS message_runtime actionlib_msgs std_msgs geometry_msgs
 )
 
 ###########

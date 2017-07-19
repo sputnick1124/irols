@@ -1,0 +1,17 @@
+# Set up enums
+uint8 ARM=1
+uint8 DISARM=0
+
+# Arm/Disarm
+uint8 arm_cmd
+
+---
+# Success/Fail
+uint8 SUCCESS=1
+uint8 FAILURE=0
+
+uint8 succeeded
+
+---
+# Feedback
+uint8 curr_status
