@@ -11,3 +11,7 @@ solutions. It fairly closely follows ML syntax and stores its FIS objects in
 a similar fashion. Also included in the package is a FIS parser for parsing
 <span style="font-variant: small-caps">Matlab</span> FIS files. This parsing
 is dependent on the Python module [`parse`](https://pypi.python.org/pypi/parse "Parse Link")
+
+A heavy emphasis on reduced copmutational complexity has been the abiding motivation behind
+this implementation of a fuzzy inference system. There are no arrays for universes of discourse,
+only membership function inverses for defuzzification.
