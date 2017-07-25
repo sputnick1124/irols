@@ -50,16 +50,7 @@ class LEZL:
 
         self.pose.pose.position.x = 0
         self.pose.pose.position.y = 0
-        self.pose.pose.position.z = 25
-        command_client(broadcast=False,
-                            command=DO_MOUNT_CTL,
-                            param1=GIMBAL_PITCH,
-                            param2=GIMBAL_ROLL,
-                            param3=GIMBAL_YAW,
-                            param4=NULL,
-                            param5=NULL,
-                            param6=NULL,
-                            param7=MNT_MODE)
+        self.pose.pose.position.z = 5
 
         wait = rospy.Time.now()
         offb = True

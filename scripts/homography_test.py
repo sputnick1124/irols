@@ -96,12 +96,8 @@ class Homographer(object):
         o = self.cam_mover.pose.orientation
         q = [o.x,o.y,o.z,o.w]
         r,p,y = efq(q,'sxyz')
-#        p -= 1.57
-        #R = np.matrix(eul_mat(y,p,-r,axes='rzxy'))[:3,:3]
         Rcam_body = np.matrix(eul_mat(0,0,-1.57))[:3,:3]
         Rbody_inert = np.matrix(eul_mat(r,p,-y))[:3,:3]
-#        L = np.diag([1,1,1])
-#        Pr = R.T*L*Pc
         Pr = Rbody_inert*Rcam_body.T*Pc
         self.dx = Pr[0]
         self.dy = -Pr[1]
