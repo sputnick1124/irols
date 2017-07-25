@@ -1,0 +1,11 @@
+# Goal
+# (empty goal)
+
+---
+# Result
+# Success/Fail
+bool success
+
+---
+# Feedback
+float32 height

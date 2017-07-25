@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 2.8.3)
 project(irols)
 
 find_package(catkin REQUIRED #COMPONENTS
+  roscpp
   genmsg
   actionlib_msgs
   actionlib
@@ -47,6 +48,8 @@ add_action_files(
   DIRECTORY action
   FILES
   DoArm.action
+  DoWP.action
+  DoLand.action
 )
 
 generate_messages(DEPENDENCIES actionlib_msgs geometry_msgs std_msgs)

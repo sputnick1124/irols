@@ -1,0 +1,13 @@
+# Goal
+# Position goal
+geometry_msgs/Pose goal_pos
+float32 radius # meters
+
+---
+# Result
+# Final Pose
+geometry_msgs/Pose final_pos
+
+---
+# Feedback
+float32 percent_complete
