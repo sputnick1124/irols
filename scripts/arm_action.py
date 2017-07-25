@@ -32,7 +32,7 @@ class DoArmServer(object):
         tries = 0
         while not res.success:
             res = self.arm_srv(goal.arm_cmd)
-            self._result.succeeded = res.success
+#            self._result.succeeded = res.success
             tries += 1
             if tries >= 3:
                 rospy.logwarn('{0}: failed to arm. Aborting'.format(self._action_name))
@@ -40,14 +40,15 @@ class DoArmServer(object):
                 return
             if res.success:
                 timer = 5
-                while not self._state.armed and goal.arm_cmd:
+                while (not self._state.armed and goal.arm_cmd) or (self._state.armed and not goal.arm_cmd):
                     rospy.loginfo('{0}: waiting for vehicle to respond'.format(self._action_name))
                     r.sleep()
                     if not timer:
-                        rospy.logwarn('{0}: arm service successful, but vehicle did not arm'.format(self._action_name))
+                        rospy.logwarn('{0}: arm service successful, but vehicle did not respond'.format(self._action_name))
                         self._as.set_aborted(self._result)
                         return
                 rospy.loginfo('{0}: {1} successful'.format(self._action_name,goal))
+                self._result.final_state = self._state.armed
                 self._as.set_succeeded(self._result)
             r.sleep()
         state_sub.unregister()

@@ -9,10 +9,10 @@ uint8 arm_cmd
 ---
 # Result
 # Success/Fail
-uint8 SUCCESS=1
-uint8 FAILURE=0
+uint8 ARMED=1
+uint8 DISARMED=0
 
-uint8 succeeded
+uint8 final_state
 
 ---
 # Feedback

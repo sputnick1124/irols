@@ -24,7 +24,7 @@ class DoLandServer(object):
 #        self.arm_srv = rospy.ServiceProxy('mavros/cmd/arming',CommandBool)
         self.arm_action = actionlib.SimpleActionClient('arm_action',
                                                        irols.msg.DoArmAction)
-        self.arm_action.feedback_cb = self.handle_arm_fb
+#        self.arm_action.feedback_cb = self.handle_arm_fb
 
         self.ext_state = rospy.wait_for_message('mavros/extended_state',
                                                  ExtendedState)
@@ -61,7 +61,8 @@ class DoLandServer(object):
             self.vel_sp_pub.publish(self.land_twist)
             r.sleep()
         rospy.loginfo('{0}: disarming'.format(self._action_name))
-        self.arm_action.send_goal(irols.msg.DoArmGoal(arm_cmd=irols.msg.DoArmGoal.DISARM))
+        self.arm_action.send_goal(irols.msg.DoArmGoal(arm_cmd=irols.msg.DoArmGoal.DISARM),
+                                  done_cb=self.handle_arm_done)
         while self.armed:
             self.vel_sp_pub.publish(self.land_twist)
             r.sleep
@@ -75,9 +76,10 @@ class DoLandServer(object):
     def handle_ext_state(self,data):
         self.landed = data.landed_state == ExtendedState.LANDED_STATE_ON_GROUND
 
-    def handle_arm_fb(self,data):
-        rospy.loginfo('{0}: listening to feedback from arm_action'.format(self._action_name))
-        self.armed = data.curr_status
+    def handle_arm_done(self,term_state,result):
+        rospy.loginfo('{0}: listening to done result from arm_action'.format(self._action_name))
+        rospy.loginfo('{0}: final state is {1}'.format(self._action_name,result.final_state))
+        self.armed = result.final_state
 
 if __name__ == '__main__':
     rospy.init_node('land_action_server')
