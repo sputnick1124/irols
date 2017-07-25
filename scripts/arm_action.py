@@ -21,10 +21,11 @@ class DoArmServer(object):
         rospy.wait_for_service('mavros/cmd/arming')
         self._state = rospy.wait_for_message('mavros/state',State)
         self.arm_srv = rospy.ServiceProxy('mavros/cmd/arming',CommandBool)
-#        self.state_sub = rospy.Subscriber('mavros/state',State,self.handle_state)
         self._as.start()
+        rospy.loginfo('{0}: online'.format(self._action_name))
 
     def execute(self, goal):
+        rospy.loginfo('{0}: received goal: {1}'.format(self._action_name,goal))
         state_sub = rospy.Subscriber('mavros/state',State,self.handle_state)
         r = rospy.Rate(1)
         res = CommandBoolResponse()
@@ -34,11 +35,23 @@ class DoArmServer(object):
             self._result.succeeded = res.success
             tries += 1
             if tries >= 3:
+                rospy.logwarn('{0}: failed to arm. Aborting'.format(self._action_name))
                 self._as.set_aborted(self._result)
+                return
             if res.success:
+                timer = 5
+                while not self._state.armed and goal.arm_cmd:
+                    rospy.loginfo('{0}: waiting for vehicle to respond'.format(self._action_name))
+                    r.sleep()
+                    if not timer:
+                        rospy.logwarn('{0}: arm service successful, but vehicle did not arm'.format(self._action_name))
+                        self._as.set_aborted(self._result)
+                        return
+                rospy.loginfo('{0}: {1} successful'.format(self._action_name,goal))
                 self._as.set_succeeded(self._result)
             r.sleep()
         state_sub.unregister()
+        rospy.loginfo('{0}: done executing goal'.format(self._action_name))
 
     def handle_state(self, data):
         self._state = data
