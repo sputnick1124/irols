@@ -176,10 +176,10 @@ class FuzzyVar(object):
         return s
  
     def __eq__(self,other):
-#        local_dict = self.__dict__.copy()
-#        other_dict = other.__dict__.copy()
-#        local_dict.pop('parent')
-#        other_dict.pop('parent')
+        local_dict = self.__dict__.copy()
+        other_dict = other.__dict__.copy()
+        local_dict.pop('parent')
+        other_dict.pop('parent')
         return local_dict == other_dict
 
     def check(self):
@@ -236,6 +236,8 @@ class MF(object):
     def __eq__(self,other):
         local_dict = self.__dict__.copy()
         other_dict = other.__dict__.copy()
+        local_dict.pop('mf')
+        other_dict.pop('mf')
         local_dict.pop('parent')
         other_dict.pop('parent')
         return local_dict == other_dict
