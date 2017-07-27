@@ -89,15 +89,6 @@ class DoWPServer(object):
         rospy.loginfo('{0}: waypoint reached'.format(self._action_name))
         self._result.final_pos = self._curr_pose.pose
         self._as.set_succeeded(self._result)
-#        pose_sub.unregister()
-#        #TODO: hack to carry waypoints over until next goal
-#        rospy.loginfo('{0}: sending buffer setpoints'.format(self._action_name))
-#        for _ in range(30):
-#            goal_pose_stamped.header.stamp = rospy.Time.now()
-#            pos_sp_pub.publish(goal_pose_stamped)
-#            r.sleep()
-#        rospy.loginfo('{0}: finished buffer setpoints'.format(self._action_name))
-#        pos_sp_pub.unregister()
 
     def handle_pose(self, data):
         self._curr_pose = data
