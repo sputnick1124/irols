@@ -43,7 +43,7 @@ class DoLandServer(object):
                                           queue_size=1)
 
         self.land_twist = Twist()
-        self.land_twist.linear.z = -0.5
+        self.land_twist.linear.z = -2.5
                 
         self.landed = False
         self.armed = True
