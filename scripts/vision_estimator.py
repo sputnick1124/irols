@@ -77,7 +77,19 @@ class VisEstimator(object):
         if not len(cnts): # no yellow(target) in image
             return data,None,None,None
         target = sorted(cnts,key=lambda c:cv2.contourArea(c))[-1]
-        ellipse_rect = cv2.fitEllipse(target)
+        leftmost = tuple(target[target[:,:,0].argmin()][0])
+        rightmost = tuple(target[target[:,:,0].argmax()][0])
+        topmost = tuple(target[target[:,:,1].argmin()][0])
+        bottommost = tuple(target[target[:,:,1].argmax()][0])
+        if (leftmost == 0 or
+            topmost == 0 or 
+            rightmost == self.cam_info.width or
+            bottommost == self.cam_info.height): #target is at least partially occluded by edge of frame
+            return data,None,None,None
+        try:
+            ellipse_rect = cv2.fitEllipse(target)
+        except: #FIXME: need to capture only OpenCV Error
+            return data,None,None,None
         
         #TODO: handle case where we are too close to see the platform and also when we just can't see a platform at all
         if not abs(1 - (ellipse_rect[1][0] - ellipse_rect[1][1])) > 0.2:
