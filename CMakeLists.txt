@@ -50,6 +50,7 @@ add_action_files(
   DoArm.action
   DoWP.action
   DoLand.action
+  DoTrack.action
 )
 
 generate_messages(DEPENDENCIES actionlib_msgs geometry_msgs std_msgs)

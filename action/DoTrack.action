@@ -1,0 +1,12 @@
+# Goal
+# Tracking altitude
+float32 alt_sp
+
+---
+# Result
+# Final Pose
+geometry_msgs/Pose final_pos
+
+---
+# Feedback
+float32 distance

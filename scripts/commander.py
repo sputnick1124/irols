@@ -3,7 +3,12 @@ import rospy
 import smach
 import smach_ros
 
-from irols.msg import DoArmGoal, DoArmAction, DoWPGoal, DoWPAction, DoLandAction
+from nav_msgs.msg import Odometry
+
+from irols.msg import DoArmGoal, DoArmAction, DoWPGoal, DoWPAction, DoLandAction, DoTrackAction, DoTrackGoal
+
+import numpy as np
+from numpy.linalg import norm
 
 waypoints = {name:DoWPGoal() for name in ['WP0','WP1','WP2','WP3','LAND']}
 
@@ -21,6 +26,13 @@ waypoints['WP3'].goal_pos.position.x = -2
 waypoints['WP3'].goal_pos.position.y = -2
 waypoints['WP3'].goal_pos.position.z = 2
 
+def covariance_cb(ud, msg):
+    cov = msg.pose.covariance
+    cov_mx = np.matrix(cov).reshape((6,6))
+    if norm(cov_mx) < 1:
+        return False
+    else:
+        return True
 
 def main():
     rospy.init_node('commander')
@@ -55,19 +67,33 @@ def main():
             smach.Sequence.add('WP4',smach_ros.SimpleActionState('wp_action',
                                                                  DoWPAction,
                                                                  goal=waypoints['WP0']))
-#            smach.Sequence.add('LAND',smach_ros.SimpleActionState('land_action',
-#                                                                 DoLandAction))
+            smach.Sequence.add('LAND',smach_ros.SimpleActionState('land_action',
+                                                                 DoLandAction))
          
         smach.StateMachine.add('WAYPOINTS',waypoint_sequence,
-                                transitions={'succeeded':'LAND',
+                                transitions={'succeeded':'TRACK',
                                              'preempted':'preempted',
                                              'aborted':'aborted'})
-#        smach.StateMachine.add('DISARM',
-#                               smach_ros.SimpleActionState('arm_action',
-#                                                           DoArmAction,
-#                                                           goal=DoArmGoal(arm_cmd=DoArmGoal.DISARM)),
-#                               {'succeeded':'succeeded',
-#                                'aborted':'aborted'})
+
+        track_machine = smach.Concurrence(outcomes=['locked','notready'],
+                                          default_outcome='notready',
+                                          outcome_map={'locked':
+                                              { 'COV_MONITOR':'invalid',
+                                                'SEEK':'succeeded'}})
+        
+        with track_machine:
+            
+            smach.Concurrence.add('SEEK',smach_ros.SimpleActionState('track_action',
+                                                                       DoTrackAction,
+                                                                       goal=DoTrackGoal(alt_sp=15)))
+
+            smach.Concurrence.add('COV_MONITOR',smach_ros.MonitorState('odometry/filtered',
+                                                                        Odometry,
+                                                                        covariance_cb))
+
+        smach.StateMachine.add('TRACK',track_machine,
+                               transitions={'notready':'TRACK',
+                                            'locked':'LAND'})
         smach.StateMachine.add('LAND',smach_ros.SimpleActionState('land_action',
                                                               DoLandAction),
                            {'succeeded':'succeeded',
