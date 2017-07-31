@@ -12,6 +12,7 @@ find_package(catkin REQUIRED #COMPONENTS
   geometry_msgs
 )
 
+catkin_python_setup()
 ################################################
 ## Declare ROS messages, services and actions ##
 ################################################
