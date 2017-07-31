@@ -1,6 +1,7 @@
 uorb start
 param load
 param set MAV_TYPE 2
+param set MAV_SYS_ID 1
 param set SYS_AUTOSTART 4010
 param set SYS_RESTART_TYPE 2
 param set SYS_MC_EST_GROUP 1
@@ -44,6 +45,7 @@ param set EKF2_ANGERR_INIT 0.01
 param set LPE_FUSION 145
 param set MNT_MODE_IN 3
 # 11110111 no vis yaw (1 << 3)
+param set SITL_UDP_PRT 14560
 
 replay tryapplyparams
 simulator start -s

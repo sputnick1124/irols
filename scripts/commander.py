@@ -67,8 +67,6 @@ def main():
             smach.Sequence.add('WP4',smach_ros.SimpleActionState('wp_action',
                                                                  DoWPAction,
                                                                  goal=waypoints['WP0']))
-            smach.Sequence.add('LAND',smach_ros.SimpleActionState('land_action',
-                                                                 DoLandAction))
          
         smach.StateMachine.add('WAYPOINTS',waypoint_sequence,
                                 transitions={'succeeded':'TRACK',
