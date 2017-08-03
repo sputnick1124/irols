@@ -1,0 +1,11 @@
+# Goal
+# (empty)
+
+---
+# Result
+# Final Error Estimate
+geometry_msgs/Point final_err
+
+---
+# Feedback
+float32 distance
