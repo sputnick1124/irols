@@ -1,0 +1,9 @@
+convert old .fis to new .yaml
+load fis into param server from launch
+finish flc_action
+test flc_action
+test imports across all nodes
+rework smach to iterate
+integrate GA as action (wrap smach in action)
+introspection
+
