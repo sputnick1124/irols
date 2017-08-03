@@ -7,8 +7,8 @@ Created on Fri Jul  8 08:44:19 2016
 from __future__ import division
 import sys
 sys.path.append('..')
-from yapflm import FIS
-from gfs import GFS
+from yapflm.yapflm import FIS
+from yapflm.gfs import GFS
 import time
 
 # traditional FIS
