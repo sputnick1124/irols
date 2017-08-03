@@ -55,18 +55,18 @@ def main():
             smach.Sequence.add('TAKEOFF',smach_ros.SimpleActionState('wp_action',
                                                                  DoWPAction,
                                                                  goal=waypoints['WP0']))
-#            smach.Sequence.add('WP1',smach_ros.SimpleActionState('wp_action',
-#                                                                 DoWPAction,
-#                                                                 goal=waypoints['WP1']))
-#            smach.Sequence.add('WP2',smach_ros.SimpleActionState('wp_action',
-#                                                                 DoWPAction,
-#                                                                 goal=waypoints['WP2']))
-#            smach.Sequence.add('WP3',smach_ros.SimpleActionState('wp_action',
-#                                                                 DoWPAction,
-#                                                                 goal=waypoints['WP3']))
-#            smach.Sequence.add('WP4',smach_ros.SimpleActionState('wp_action',
-#                                                                 DoWPAction,
-#                                                                 goal=waypoints['WP0']))
+            smach.Sequence.add('WP1',smach_ros.SimpleActionState('wp_action',
+                                                                 DoWPAction,
+                                                                 goal=waypoints['WP1']))
+            smach.Sequence.add('WP2',smach_ros.SimpleActionState('wp_action',
+                                                                 DoWPAction,
+                                                                 goal=waypoints['WP2']))
+            smach.Sequence.add('WP3',smach_ros.SimpleActionState('wp_action',
+                                                                 DoWPAction,
+                                                                 goal=waypoints['WP3']))
+            smach.Sequence.add('WP4',smach_ros.SimpleActionState('wp_action',
+                                                                 DoWPAction,
+                                                                 goal=waypoints['WP0']))
          
         smach.StateMachine.add('WAYPOINTS',waypoint_sequence,
                                 transitions={'succeeded':'TRACK',

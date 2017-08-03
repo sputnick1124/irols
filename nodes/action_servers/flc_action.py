@@ -2,8 +2,8 @@
 import rospy
 import actionlib
 
-from irols.yapflm import fisyaml
-from irols.utils import Controller
+import yapflm.fisyaml
+from utils import Controller
 
 import irols.msg
 
@@ -82,3 +82,8 @@ class DoFLCServer(object):
         self._result.final_err.y = err.y
         self._result.final_err.z = err.z
         self._as.set_succeded(self._result)
+
+if __name__ == "__main__":
+    rospy.init_node('flc_action_server')
+    server = DoFLCServer('flc_action')
+    rospy.spin()

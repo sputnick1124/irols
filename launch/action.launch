@@ -3,7 +3,5 @@
     <node pkg="irols" name="arm_action" type="arm_action.py" output="screen"/>
     <node pkg="irols" name="land_action" type="land_action.py" output="screen"/>
     <node pkg="irols" name="wp_action" type="wp_action.py" output="screen"/>
-<!--
     <node pkg="irols" name="track_action" type="track_action.py" output="screen"/>
--->
 </launch>
