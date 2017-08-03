@@ -37,12 +37,12 @@ class VisEstimator(object):
             'vision_estimate',
             Odometry,
             queue_size=10)
-        self.cov = [0.5, 0, 0, 0, 0, 0,
-                    0, 0.5, 0, 0, 0, 0,
+        self.cov = [0.25, 0, 0, 0, 0, 0,
+                    0, 0.25, 0, 0, 0, 0,
                     0, 0, 0.5, 0, 0, 0,
-                    0, 0, 0, 1, 0, 0,
-                    0, 0, 0, 0, 1, 0,
-                    0, 0, 0, 0, 0, 1]
+                    0, 0, 0, 5, 0, 0,
+                    0, 0, 0, 0, 5, 0,
+                    0, 0, 0, 0, 0, 5]
                 
         # Set up camera stuff
         self.bridge = CvBridge()
@@ -89,6 +89,7 @@ class VisEstimator(object):
         try:
             ellipse_rect = cv2.fitEllipse(target)
         except: #FIXME: need to capture only OpenCV Error
+        #error: OpenCV Error: Incorrect size of input array (There should be at least 5 points to fit the ellipse) in fitEllipse
             return data,None,None,None
         
         #TODO: handle case where we are too close to see the platform and also when we just can't see a platform at all
@@ -129,6 +130,7 @@ class VisEstimator(object):
         odom = Odometry(pose=pose_w_cov)
         odom.header.stamp = rospy.Time.now()
         odom.header.frame_id = 'pad'
+        odom.child_frame_id = 'camera::camera_link'
         self.odom_pub.publish(odom)
         
         ci = ((data.shape[0]/2),(data.shape[1]/2))

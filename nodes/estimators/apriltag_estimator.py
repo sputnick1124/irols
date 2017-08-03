@@ -15,9 +15,9 @@ class ApriltagEstimator(object):
                 'apriltag_estimate',
                 Odometry,
                 queue_size=10)
-        self.cov = [0.1, 0, 0, 0, 0, 0,
-                    0, 0.1, 0, 0, 0, 0,
-                    0, 0, 0.1, 0, 0, 0,
+        self.cov = [0.01, 0, 0, 0, 0, 0,
+                    0, 0.01, 0, 0, 0, 0,
+                    0, 0, 0.01, 0, 0, 0,
                     0, 0, 0, 0.1, 0, 0,
                     0, 0, 0, 0, 0.1, 0,
                     0, 0, 0, 0, 0, 0.1]
@@ -31,6 +31,7 @@ class ApriltagEstimator(object):
             odom = Odometry(pose=pose_w_cov)
             odom.header.stamp = rospy.Time.now()
             odom.header.frame_id = 'pad'
+            odom.child_frame_id = 'camera::camera_link'
             self.odom_pub.publish(odom)
         else:
             # no tag, so no estimate update
