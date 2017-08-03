@@ -1,13 +1,10 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Thu Jun  9 15:31:11 2016
-
-@author: nick
-"""
+#!/usr/bin/env python
 from __future__ import division
+import sys
 from parse import parse
 from yapflm import FIS
 from time import time
+from fisyaml import fis_to_yaml
 
 class FISParser:
     def __init__(self,fisfile):
@@ -39,12 +36,14 @@ class FISParser:
         self.fis.addvar(vartype,varname)
         for mf in range(int(fisvar['nummfs'])):
             mfargs = parse("{name}':'{type}',[{range}]",fisvar['mf%d'%(mf+1)])
+            if not mfargs['type'] == 'trimf':
+                raise TypeError('Type {type} is not supported'.format(mfargs['type']))
 #                print(varnum)
             if 'input' in vartype:
-                self.fis.input[varnum].addmf(mfargs['name'], mfargs['type'],
+                self.fis.input[varnum].addmf(mfargs['name'], 
                                         list(map(float,mfargs['range'].split())))
             elif 'output' in vartype:
-                self.fis.output[varnum].addmf(mfargs['name'], mfargs['type'],
+                self.fis.output[varnum].addmf(mfargs['name'], 
                                         list(map(float,mfargs['range'].split())))
     
     def get_vars(self):
@@ -87,13 +86,14 @@ class FISParser:
             r += [rp['w'],rp['c']-1]
             rules.append(r) 
         self.fis.addrule(rules)
-            
+
+def fisfile_to_yaml(fisfile,yamlfile):
+    fp = FISParser(fisfile)
+    fis_to_yaml(fp.fis,yamlfile)
         
 if __name__ == "__main__":
-    myfisparse = FISParser('examples/tipper.fis')
-    fis = myfisparse.fis
-    T1 = time()
-    for i in range(1000):
-        fis.evalfis([6.6,9.8])
-    print('1000 loops, %0.2f ms per loop'%((time()-T1)))
-    
+    argv = sys.argv
+    if len(argv) < 3:
+        print("usage: {0} fisfile yamlfile".format(argv[0]))
+        sys.exit(1)
+    fisfile_to_yaml(argv[1],argv[2])
