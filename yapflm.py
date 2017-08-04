@@ -143,12 +143,15 @@ class FIS(object):
                 outmf = self.output[out].mf[con[out]].evalmf(rulestrength)
                 ruleout[-1].append(outmf)
         for o in xrange(numout):
+#            print('o: ',o)
 #            ruletemp = [r[o] for r in ruleout]
 #            agg = [aggMethod([y[i] for y in ruletemp]) for i in xrange(len(ruletemp[0]))]
 #            agg = aggMethod(ruleout,axis=0)
             outs = [y[o] for y in ruleout]
+#            print('outs: ',outs)
 #            print(outs)
             outputs.append(defuzzMethod(outs))
+#        print('outputs: ',outputs)
         return outputs if len(outputs)>1 else outputs[0]
 
 class FuzzyVar(object):
@@ -302,6 +305,8 @@ class InputTriMF(TriMF):
         self.fn = infn
     
     def __call__(self,x):
+        if x == self.x_star:
+            return 1
         line = x > self.x_star
         return self.fn(x,self.slope[line],self.y_int[line])
     
@@ -323,11 +328,11 @@ class OutputTriMF(TriMF):
 
 def infn(x,m,b):
     y = ((m * x) + b) if m else None #y
-    return y if y >= 0 else 0
+    return y if y>=0 else 0
 
 def outfn(y,m,b):
     x = ((y - b) / m) if m else None #x
-    return x if x >= 0 else 0
+    return x if (x is not None) else 0
 
 
 def defuzzCentroid(outs):
