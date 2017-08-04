@@ -302,6 +302,8 @@ class InputTriMF(TriMF):
         self.fn = infn
     
     def __call__(self,x):
+        if x == self.x_star:
+            return 1
         line = x > self.x_star
         return self.fn(x,self.slope[line],self.y_int[line])
     
@@ -327,7 +329,7 @@ def infn(x,m,b):
 
 def outfn(y,m,b):
     x = ((y - b) / m) if m else None #x
-    return x if x >= 0 else 0
+    return x if (x is not None) else 0
 
 
 def defuzzCentroid(outs):
