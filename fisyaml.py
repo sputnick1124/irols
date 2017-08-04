@@ -55,7 +55,7 @@ def fis_from_dict(fis_dict):
     for var in fis_dict['output']:
         fis.addvar('output',var['name'])
         for mf in var['mf']:
-            fis.input[-1].addmf(mf['name'],mf['params'])
+            fis.output[-1].addmf(mf['name'],mf['params'])
     
     for rule in fis_dict['rules']:
         fis.addrule(rule)
