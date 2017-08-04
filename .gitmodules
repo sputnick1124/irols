@@ -1,4 +1,4 @@
 [submodule "src/irols/yapflm"] 
-  path = src/irols/yapflm 
+	path = src/yapflm
   url = git://github.com/sputnick1124/yapflm
 
