@@ -1,6 +1,14 @@
 <launch>
+    <!-- image pipeline and apriltags -->
+    <include file="$(find irols)/launch/image_pipeline.launch"/>
+    <include file="$(find irols)/launch/apriltags_ros.launch"/>
+
+    <!-- estimation nodes -->
 	<node pkg="irols" type="vision_estimator.py" name="vision_estimator" output="screen"/>
 	<node pkg="irols" type="apriltag_estimator.py" name="apriltag_estimator" output="screen"/>
+    <include file="$(find irols)/launch/ekf.launch"/>
 
-    <node pkg="rqt_image_view" type="rqt_image_view" name="image_viewer" args="/camera1/image_raw"/>
+    <!-- action servers -->
+    <include file="$(find irols)/launch/action.launch"/>
+
 </launch>

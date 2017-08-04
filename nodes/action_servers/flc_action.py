@@ -8,7 +8,8 @@ from irols.utils import Controller
 from yapflm import fisyaml
 
 import tf2_ros
-from numpy import dot, sqrt
+from tf.transformations import euler_from_quaternion as efq
+from numpy import dot, sqrt, sign
 
 from geometry_msgs.msg import Twist
 
@@ -17,17 +18,22 @@ class FuzzyController(Controller):
         super(FuzzyController,self).__init__()
         self.fis_list = fis_list
         self.scales = scales
-    
+
     def calc_control(self,*errs):
         controls = []
         for fis,scale,err in zip(self.fis_list,self.scales,errs):
-            controls.append(fis.evalfis(err.E,err.Ed)*scale)
+            E = err.E if abs(err.E) <= 1 else sign(err.E)
+            Ed = err.Ed if abs(err.Ed) <= 1 else sign(err.Ed)
+            unscaled = fis.evalfis([E,Ed])
+#            print(unscaled,err.E,err.Ed)
+            controls.append(unscaled*scale)
+        controls[-1] = 0 # ignore yaw input for now
         return controls
 
 class DoFLCServer(object):
     _feedback = irols.msg.DoFLCFeedback()
     _result = irols.msg.DoFLCResult()
-    
+
     def __init__(self,name):
         self._action_name = name
         self._as = actionlib.SimpleActionServer(self._action_name,
@@ -39,6 +45,10 @@ class DoFLCServer(object):
         tf_listener = tf2_ros.TransformListener(self.tf_buffer)
 
         self.vel_sp_pub = rospy.Publisher('mavros/setpoint_velocity/cmd_vel_unstamped',
+                                      Twist,
+                                      queue_size=1)
+        # ghost topic to observe control without actually exerting it
+        self.vel_sp_pub_sim = rospy.Publisher('irols/cmd_vel_sim',
                                       Twist,
                                       queue_size=1)
 
@@ -53,7 +63,7 @@ class DoFLCServer(object):
             rospy.logerr('{0}: not starting the server'.format(self._action_name))
             return
         fis_list = [fisyaml.fis_from_dict(fd) for fd in fis_dicts]
-        self.flc = FuzzyController(fis_list,[3,3,4,2])
+        self.flc = FuzzyController(fis_list,[1,1,1,1])
 
         self._as.start()
         rospy.loginfo('{0}: online'.format(self._action_name))
@@ -67,22 +77,27 @@ class DoFLCServer(object):
             rospy.logerr('{0}: {1}'.format(self._action_name,e))
             self._as.set_aborted()
             return
-        
+
         rate = rospy.Rate(10)
         cmd_vel = Twist()
-        dist =sqrt(dot([err.x,err.y,err.z],[err.x,err.y,err.z])) 
+        pos_err = err.transform.translation
+        dist =sqrt(dot([pos_err.x,pos_err.y,pos_err.z],[pos_err.x,pos_err.y,pos_err.z]))
         while dist > 0.3:
             try:
-                err = self.tf_listener.lookup_transform('pad','base_link',rospy.Time(0))
-                vx,vy,vz,dT = self.flc(err.x,err.y,err.z,err.T)
+                if self._as.is_preempt_requested():
+                    self._as.set_preempted(self._result)
+                    return
+                err = self.tf_buffer.lookup_transform('pad','base_link',rospy.Time(0))
+                pos_err = err.transform.translation
+                vx,vy,vz,dT = self.flc(err)
                 cmd_vel.linear.x = vx
                 cmd_vel.linear.y = vy
                 cmd_vel.linear.z = vz
                 cmd_vel.angular.z = dT
                 self.vel_sp_pub.publish(cmd_vel)
-            
-                dist =sqrt(dot([err.x,err.y,err.z],[err.x,err.y,err.z]))
-                self._feedback.dist = dist
+
+                dist =sqrt(dot([pos_err.x,pos_err.y,pos_err.z],[pos_err.x,pos_err.y,pos_err.z]))
+                self._feedback.distance = dist
                 self._as.publish_feedback(self._feedback)
                 rate.sleep()
             except KeyboardInterrupt:
@@ -92,10 +107,10 @@ class DoFLCServer(object):
             except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException):
                 rate.sleep()
                 continue
-        
-        self._result.final_err.x = err.x
-        self._result.final_err.y = err.y
-        self._result.final_err.z = err.z
+
+        self._result.final_err.x = pos_err.x
+        self._result.final_err.y = pos_err.y
+        self._result.final_err.z = pos_err.z
         self._as.set_succeded(self._result)
 
 if __name__ == "__main__":

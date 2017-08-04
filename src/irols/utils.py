@@ -39,7 +39,7 @@ class Controller(object):
         self.dy(dxyz.y,t)
         self.dz(dxyz.z,t)
         self.dT(T,t)
-        return calc_control(self.dx,self.dy,self.dz,self.T)
+        return self.calc_control(self.dx,self.dy,self.dz,self.dT)
 
     def calc_control(self,*errs):
         pass

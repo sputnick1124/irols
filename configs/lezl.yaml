@@ -1,6 +1,6 @@
 aggMethod: max
 andMethod: min
-defuzzMethod: centroid
+defuzzMethod: weightedMV
 impMethod: min
 input:
 - mf:

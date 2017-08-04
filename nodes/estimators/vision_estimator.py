@@ -81,10 +81,11 @@ class VisEstimator(object):
         rightmost = tuple(target[target[:,:,0].argmax()][0])
         topmost = tuple(target[target[:,:,1].argmin()][0])
         bottommost = tuple(target[target[:,:,1].argmax()][0])
-        if (leftmost == 0 or
-            topmost == 0 or 
-            rightmost == self.cam_info.width or
-            bottommost == self.cam_info.height): #target is at least partially occluded by edge of frame
+        if (leftmost[0] == 0 or
+            topmost[1] == 0 or 
+            rightmost[0] == self.cam_info.width or
+            bottommost[1] == self.cam_info.height): #target is at least partially occluded by edge of frame
+#            rospy.loginfo('{0}: frame occlusion. not trusting estimate'.format('vision_estimator'))
             return data,None,None,None
         try:
             ellipse_rect = cv2.fitEllipse(target)
