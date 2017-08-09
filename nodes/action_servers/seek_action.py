@@ -30,14 +30,14 @@ def euclidean_distance(pose_a,pose_b,ignore_z=False):
         dz = b.z - a.z
     return sqrt(dx*dx + dy*dy + dz*dz)
 
-class DoTrackServer(object):
-    _feedback = irols.msg.DoTrackFeedback()
-    _result = irols.msg.DoTrackResult()
+class SeekServer(object):
+    _feedback = irols.msg.DoSeekFeedback()
+    _result = irols.msg.DoSeekResult()
 
     def __init__(self,name):
         self._action_name = name
         self._as = actionlib.SimpleActionServer(self._action_name,
-                                                irols.msg.DoTrackAction,
+                                                irols.msg.DoSeekAction,
                                                 auto_start=False)
         self._as.register_goal_callback(self.goal_cb)
         self._as.register_preempt_callback(self.preempt_cb)
@@ -112,6 +112,6 @@ class DoTrackServer(object):
         self.state = data
 
 if __name__ == '__main__':
-    rospy.init_node('track_action_server')
-    server = DoTrackServer('track_action')
+    rospy.init_node('seek_action_server')
+    server = SeekServer('seek_action')
     rospy.spin()

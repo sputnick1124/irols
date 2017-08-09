@@ -9,7 +9,7 @@ from mavros_msgs.msg import ExtendedState
 
 from geometry_msgs.msg import PoseStamped, Twist
 
-class DoLandServer(object):
+class LandServer(object):
     _feedback = irols.msg.DoLandFeedback()
     _result = irols.msg.DoLandResult()
     
@@ -83,5 +83,5 @@ class DoLandServer(object):
 
 if __name__ == '__main__':
     rospy.init_node('land_action_server')
-    server = DoLandServer('land_action')
+    server = LandServer('land_action')
     rospy.spin()

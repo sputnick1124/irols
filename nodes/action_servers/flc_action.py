@@ -30,7 +30,7 @@ class FuzzyController(Controller):
         controls[-1] = 0 # ignore yaw input for now
         return controls
 
-class DoFLCServer(object):
+class FLCServer(object):
     _feedback = irols.msg.DoFLCFeedback()
     _result = irols.msg.DoFLCResult()
 
@@ -115,5 +115,5 @@ class DoFLCServer(object):
 
 if __name__ == "__main__":
     rospy.init_node('flc_action_server')
-    server = DoFLCServer('flc_action')
+    server = FLCServer('flc_action')
     rospy.spin()

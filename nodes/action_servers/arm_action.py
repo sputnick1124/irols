@@ -8,7 +8,7 @@ from mavros_msgs.msg import State
 from mavros_msgs.srv import CommandBool, CommandBoolResponse
 
 
-class DoArmServer(object):
+class ArmServer(object):
     _feedback = irols.msg.DoArmFeedback()
     _result = irols.msg.DoArmResult()
 
@@ -63,5 +63,5 @@ class DoArmServer(object):
 
 if __name__ == '__main__':
     rospy.init_node('arm_action_server')
-    server = DoArmServer('arm_action')
+    server = ArmServer('arm_action')
     rospy.spin()

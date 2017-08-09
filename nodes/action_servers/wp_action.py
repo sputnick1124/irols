@@ -26,7 +26,7 @@ def euclidean_distance(pose_a,pose_b):
     dz = b.z - a.z
     return sqrt(dx*dx + dy*dy + dz*dz)
 
-class DoWPServer(object):
+class WPServer(object):
     _feedback = irols.msg.DoWPFeedback()
     _result = irols.msg.DoWPResult()
 
@@ -99,5 +99,5 @@ class DoWPServer(object):
 
 if __name__ == '__main__':
     rospy.init_node('wp_action_server')
-    server = DoWPServer('wp_action')
+    server = WPServer('wp_action')
     rospy.spin()

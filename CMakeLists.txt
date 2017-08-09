@@ -51,7 +51,7 @@ add_action_files(
   DoArm.action
   DoWP.action
   DoLand.action
-  DoTrack.action
+  DoSeek.action
   DoFLC.action
 )
 
