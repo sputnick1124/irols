@@ -5,7 +5,7 @@ import smach_ros
 
 from nav_msgs.msg import Odometry
 
-from irols.msg import DoArmGoal, DoArmAction, DoWPGoal, DoWPAction, DoLandAction, DoTrackAction, DoTrackGoal
+from irols.msg import DoArmGoal, DoArmAction, DoWPGoal, DoWPAction, DoLandAction, DoSeekAction, DoSeekGoal
 
 import numpy as np
 from numpy.linalg import norm
@@ -81,9 +81,9 @@ def main():
         
         with track_machine:
             
-            smach.Concurrence.add('SEEK',smach_ros.SimpleActionState('track_action',
-                                                                       DoTrackAction,
-                                                                       goal=DoTrackGoal(alt_sp=5)))
+            smach.Concurrence.add('SEEK',smach_ros.SimpleActionState('seek_action',
+                                                                       DoSeekAction,
+                                                                       goal=DoSeekGoal(alt_sp=5)))
 
             smach.Concurrence.add('COV_MONITOR',smach_ros.MonitorState('odometry/filtered',
                                                                         Odometry,
