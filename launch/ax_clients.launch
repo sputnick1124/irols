@@ -3,6 +3,6 @@
     <node pkg="actionlib" type="axclient.py" name="arm_client" args="/arm_action"/>
     <node pkg="actionlib" type="axclient.py" name="wp_client" args="/wp_action"/>
     <node pkg="actionlib" type="axclient.py" name="flc_client" args="/flc_action"/>
-    <node pkg="actionlib" type="axclient.py" name="track_client" args="/track_action"/>
+    <node pkg="actionlib" type="axclient.py" name="seek_client" args="/seek_action"/>
     <node pkg="actionlib" type="axclient.py" name="land_client" args="/land_action"/>
 </launch>

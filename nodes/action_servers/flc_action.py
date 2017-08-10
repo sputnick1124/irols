@@ -100,10 +100,10 @@ class FLCServer(object):
                 self._feedback.distance = dist
                 self._as.publish_feedback(self._feedback)
                 rate.sleep()
-            except KeyboardInterrupt:
-                if self._as.is_active():
-                    self._as.set_aborted()
-                return
+                if rospy.is_shutdown():
+                    if self._as.is_active():
+                        self._as.set_aborted()
+                    return
             except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException):
                 rate.sleep()
                 continue

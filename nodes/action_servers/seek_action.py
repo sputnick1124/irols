@@ -84,6 +84,10 @@ class SeekServer(object):
             self._feedback.distance = euclidean_distance(self.curr_pos,self.pos_sp)
             self._as.publish_feedback(self._feedback)
             r.sleep()
+            if rospy.is_shutdown():
+                if self._as.is_active():
+                    self._as.set_aborted()
+                return
         self._result.final_pos = self.curr_pos
         self._as.set_succeeded(self._result)
     
