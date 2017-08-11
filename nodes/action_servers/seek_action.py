@@ -44,6 +44,8 @@ class SeekServer(object):
 
         rospy.wait_for_message('p3at/odom',Odometry)
         self.alt_sp = 10
+        self.x_offset = 0
+        self.y_offset = 0
         self.pos_sp = PoseStamped()
         self.odom_pub = rospy.Subscriber('p3at/odom',
                                          Odometry,
@@ -95,6 +97,8 @@ class SeekServer(object):
         """implicitly sets any previous goal to preempted"""
         goal = self._as.accept_new_goal()
         self.alt_sp = goal.alt_sp
+        self.x_offset = goal.x_offset
+        self.y_offset = goal.y_offset
         rospy.loginfo('{0}: received goal: {1}'.format(self._action_name,goal))
         rospy.loginfo('{0}: current goal state is {1}'.format(self._action_name,self._as.is_active()))
     
@@ -104,8 +108,8 @@ class SeekServer(object):
     def handle_odom(self,data):
         x = data.pose.pose.position.x
         y = data.pose.pose.position.y
-        self.pos_sp.pose.position.x = x
-        self.pos_sp.pose.position.y = y
+        self.pos_sp.pose.position.x = x + self.x_offset
+        self.pos_sp.pose.position.y = y + self.y_offset
         self.pos_sp.pose.position.z = self.alt_sp
             
 

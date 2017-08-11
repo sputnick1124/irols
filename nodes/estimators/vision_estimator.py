@@ -116,13 +116,14 @@ class VisEstimator(object):
         Rbody_inert = np.matrix(eul_mat(r,p,-y))[:3,:3]
         Pr = Rbody_inert*Rcam_body.T*Pc
         dx = Pr[0]
-        dy = -Pr[1]
+        dy = -Pr[1] # invert y to make sane coordinate system (right:x+,up:y+)
         #print('dx',float(Pr[0]),' dy',float(Pr[1]),'rpy',r,p,-y)
         
         # build message for estimator
         pose = Pose()
-        pose.position.x = dx
-        pose.position.y = dy
+        # rotate +x to +y and +y to -x to reflect the fact that +x is out the nose of the vehicle
+        pose.position.x = -dy
+        pose.position.y = dx
         pose.position.z = dz
         pose.orientation = o
         pose_w_cov = PoseWithCovariance(

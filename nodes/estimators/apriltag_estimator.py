@@ -27,7 +27,7 @@ class ApriltagEstimator(object):
             pose_w_cov = PoseWithCovariance(
                 pose = tag_array.detections[0].pose.pose,
                 covariance=self.cov)
-            pose_w_cov.pose.position.y *= -1
+            pose_w_cov.pose.position.x,pose_w_cov.pose.position.y = pose_w_cov.pose.position.y, pose_w_cov.pose.position.x
             odom = Odometry(pose=pose_w_cov)
             odom.header.stamp = rospy.Time.now()
             odom.header.frame_id = 'pad'

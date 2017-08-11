@@ -94,6 +94,9 @@ class FLCServer(object):
                 cmd_vel.linear.y = vy
                 cmd_vel.linear.z = vz
                 cmd_vel.angular.z = dT
+#                cmd_vel.linear.x = pos_err.x
+#                cmd_vel.linear.y = pos_err.y
+#                cmd_vel.linear.z = pos_err.z
                 self.vel_sp_pub.publish(cmd_vel)
 
                 dist =sqrt(dot([pos_err.x,pos_err.y,pos_err.z],[pos_err.x,pos_err.y,pos_err.z]))
@@ -111,7 +114,7 @@ class FLCServer(object):
         self._result.final_err.x = pos_err.x
         self._result.final_err.y = pos_err.y
         self._result.final_err.z = pos_err.z
-        self._as.set_succeded(self._result)
+        self._as.set_succeeded(self._result)
 
 if __name__ == "__main__":
     rospy.init_node('flc_action_server')

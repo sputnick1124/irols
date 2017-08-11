@@ -1,5 +1,3 @@
-test flc_action
-make sure the actions are correct sign/axis
 rework smach to iterate
 integrate GA as action (wrap smach in action)
 introspection (for GA)
