@@ -1,7 +1,5 @@
 <launch>
-<!--
-    <node name="bl_cam" pkg="tf2_ros" type="static_transform_publisher" args="0 0 0 0 0 0 1 base_link camera::camera_link" />
--->
+    <node name="bl_cam" pkg="tf2_ros" type="static_transform_publisher" args="0 0 -0.045 0 0 0 1 base_link camera::camera_link" />
     <node name="bl_fcu" pkg="tf2_ros" type="static_transform_publisher" args="0 0 0 1 0 0 0 base_link fcu" />
     <node name="pad_chassis" pkg="tf2_ros" type="static_transform_publisher" args="0 0 0.15 0 0 0 1 chassis pad" />
 

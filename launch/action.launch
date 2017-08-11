@@ -4,9 +4,7 @@
     <node pkg="irols" name="land_action" type="land_action.py" output="screen"/>
     <node pkg="irols" name="wp_action" type="wp_action.py" output="screen"/>
     <node pkg="irols" name="seek_action" type="seek_action.py" output="screen"/>
-<!--
     <node pkg="irols" name="flc_action" type="flc_action.py" output="screen"/>
--->
 
     <rosparam command="load" file="$(find irols)/configs/x_fis.yaml" ns="x_fis"/>
     <rosparam command="load" file="$(find irols)/configs/y_fis.yaml" ns="y_fis"/>

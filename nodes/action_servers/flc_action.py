@@ -9,9 +9,11 @@ from yapflm import fisyaml
 
 import tf2_ros
 from tf.transformations import euler_from_quaternion as efq
-from numpy import dot, sqrt, sign
+from numpy import dot, sqrt, sign, matrix
+from numpy.linalg import norm
 
 from geometry_msgs.msg import Twist
+from nav_msgs.msg import Odometry
 
 class FuzzyController(Controller):
     def __init__(self,fis_list,scales):
@@ -44,6 +46,7 @@ class FLCServer(object):
         self.tf_buffer = tf2_ros.Buffer()
         tf_listener = tf2_ros.TransformListener(self.tf_buffer)
 
+        self.cov_norm = 0
         self.vel_sp_pub = rospy.Publisher('mavros/setpoint_velocity/cmd_vel_unstamped',
                                       Twist,
                                       queue_size=1)
@@ -103,7 +106,7 @@ class FLCServer(object):
                 self._feedback.distance = dist
                 self._as.publish_feedback(self._feedback)
                 rate.sleep()
-                if rospy.is_shutdown():
+                if rospy.is_shutdown() or self.cov_norm > 0.1:
                     if self._as.is_active():
                         self._as.set_aborted()
                     return
@@ -115,6 +118,11 @@ class FLCServer(object):
         self._result.final_err.y = pos_err.y
         self._result.final_err.z = pos_err.z
         self._as.set_succeeded(self._result)
+    
+    def odom_cb(self,msg):
+        cov = msg.pose.covariance
+        cov_mx = matrix(cov).reshape((6,6))[:3,:3]
+        self.cov_norm = norm(cov_mx)
 
 if __name__ == "__main__":
     rospy.init_node('flc_action_server')

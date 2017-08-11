@@ -75,7 +75,7 @@ class SeekServer(object):
     def execute_loop(self):
         r = rospy.Rate(10)
         
-        while euclidean_distance(self.curr_pos,self.pos_sp,ignore_z=True) > 0.00:
+        while euclidean_distance(self.curr_pos,self.pos_sp,ignore_z=True) > 0.75:
             if not self._as.is_active():
                 continue
             if not self.state.mode == "OFFBOARD":
