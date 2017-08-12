@@ -1,1 +1,1 @@
-int8[]
+int8[] rule
