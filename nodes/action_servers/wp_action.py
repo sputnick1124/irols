@@ -3,28 +3,13 @@ import rospy
 import actionlib
 
 import irols.msg
+from irols.utils import euclidean_distance
 
 from mavros_msgs.srv import SetMode
 from mavros_msgs.msg import State
 from geometry_msgs.msg import PoseStamped, Pose
 
 from math import sqrt
-
-def euclidean_distance(pose_a,pose_b):
-    if isinstance(pose_a,PoseStamped):
-        pose_a = pose_a.pose
-    elif not isinstance(pose_a,Pose):
-        raise TypeError('Type must be Pose[Stamped]')
-    if isinstance(pose_b,PoseStamped):
-        pose_b = pose_b.pose
-    elif not isinstance(pose_b,Pose):
-        raise TypeError('Type must be Pose[Stamped]')
-    a = pose_a.position
-    b = pose_b.position
-    dx = b.x - a.x
-    dy = b.y - a.y
-    dz = b.z - a.z
-    return sqrt(dx*dx + dy*dy + dz*dz)
 
 class WPServer(object):
     _feedback = irols.msg.DoWPFeedback()

@@ -1,0 +1,19 @@
+# Goal
+# set hyperparams
+int16 num_gen
+
+---
+
+# Result
+# best fis_array
+irols/FISArray fis_array
+# best fitness
+float32 min_cost
+
+---
+
+# Feedback
+# current generation
+int16 curr_gen
+# curr best fitness
+float32 curr_min_cost

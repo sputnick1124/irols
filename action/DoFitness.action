@@ -1,0 +1,11 @@
+# Goal
+# (empty goal)
+
+---
+# Result
+# cost of controller
+float32 cost
+
+---
+# Feedback
+float32 rms_h_accel

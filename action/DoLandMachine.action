@@ -4,9 +4,9 @@ irols/FISArray fis_array
 
 ---
 # Result
-# Final Error Estimate
-geometry_msgs/Point final_err
+# Success/Fail
+bool success
 
 ---
 # Feedback
-float32 distance
+float32 height

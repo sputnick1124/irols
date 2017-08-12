@@ -3,32 +3,12 @@ import rospy
 import actionlib
 
 import irols.msg
+from irols.utils import euclidean_distance
 
 from mavros_msgs.msg import State
 from mavros_msgs.srv import SetMode
-from geometry_msgs.msg import PoseStamped, Pose
+from geometry_msgs.msg import PoseStamped
 from nav_msgs.msg import Odometry
-
-from math import sqrt
-
-def euclidean_distance(pose_a,pose_b,ignore_z=False):
-    if isinstance(pose_a,PoseStamped):
-        pose_a = pose_a.pose
-    elif not isinstance(pose_a,Pose):
-        raise TypeError('Type must be Pose[Stamped]')
-    if isinstance(pose_b,PoseStamped):
-        pose_b = pose_b.pose
-    elif not isinstance(pose_b,Pose):
-        raise TypeError('Type must be Pose[Stamped]')
-    a = pose_a.position
-    b = pose_b.position
-    dx = b.x - a.x
-    dy = b.y - a.y
-    if ignore_z:
-        dz = 0
-    else:
-        dz = b.z - a.z
-    return sqrt(dx*dx + dy*dy + dz*dz)
 
 class SeekServer(object):
     _feedback = irols.msg.DoSeekFeedback()
@@ -75,7 +55,7 @@ class SeekServer(object):
     def execute_loop(self):
         r = rospy.Rate(10)
         
-        while euclidean_distance(self.curr_pos,self.pos_sp,ignore_z=True) > 0.75:
+        while euclidean_distance(self.curr_pos,self.pos_sp) > 0.75:
             if not self._as.is_active():
                 continue
             if not self.state.mode == "OFFBOARD":

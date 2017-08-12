@@ -81,6 +81,9 @@ class FLCServer(object):
             self._as.set_aborted()
             return
 
+        if goal.fis_array:
+            fis_list = [fisyaml.fis_from_ros_msg(msg) for msg in goal.fis_array]
+            self.flc.fis_list = fis_list
         rate = rospy.Rate(10)
         cmd_vel = Twist()
         pos_err = err.transform.translation

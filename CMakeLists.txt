@@ -37,12 +37,16 @@ catkin_python_setup()
 ##   * uncomment the generate_messages entry below
 ##   * add every package in MSG_DEP_SET to generate_messages(DEPENDENCIES ...)
 
-## Generate services in the 'srv' folder
-# add_service_files(
-#   FILES
-#   Service1.srv
-#   Service2.srv
-# )
+add_message_files(
+  DIRECTORY msg
+  FILES
+  SimState.msg
+  FISArray.msg
+  FIS.msg
+  Var.msg
+  MF.msg
+  Rule.msg
+)
 
 ## Generate actions in the 'action' folder
 add_action_files(
@@ -53,6 +57,9 @@ add_action_files(
   DoLand.action
   DoSeek.action
   DoFLC.action
+  DoGA.action
+  DoFitness.action
+  DoLandMachine.action
 )
 
 generate_messages(DEPENDENCIES actionlib_msgs geometry_msgs std_msgs)

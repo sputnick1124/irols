@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 from tf.transformations import euler_from_quaternion as efq
+from geometry_msgs.msg import Pose, PoseStamped
+
+from math import sqrt
 
 class StateError(object):
     def __init__(self):
@@ -43,3 +46,22 @@ class Controller(object):
 
     def calc_control(self,*errs):
         pass
+
+def euclidean_distance(pose_a,pose_b,ignore_z=False):
+    if isinstance(pose_a,PoseStamped):
+        pose_a = pose_a.pose
+    elif not isinstance(pose_a,Pose):
+        raise TypeError('Type must be Pose[Stamped]')
+    if isinstance(pose_b,PoseStamped):
+        pose_b = pose_b.pose
+    elif not isinstance(pose_b,Pose):
+        raise TypeError('Type must be Pose[Stamped]')
+    a = pose_a.position
+    b = pose_b.position
+    dx = b.x - a.x
+    dy = b.y - a.y
+    if ignore_z:
+        dz = 0
+    else:
+        dz = b.z - a.z
+    return sqrt(dx*dx + dy*dy + dz*dz)
