@@ -3,6 +3,7 @@
 from yapflm import FIS
 import yaml
 
+from rospy_message_converter import message_converter
 
 def _varyaml_dict(var):
     var_dict = {}
@@ -72,3 +73,15 @@ def fis_from_yaml(filename):
         raw_text = yamlin.readlines()
     fis_dict = yaml.load(''.join(raw_text))
     return fis_from_dict(fis_dict)
+
+def fis_to_ros_msg(fis):
+    fd = fis_to_dict(fis)
+    fd['rules'] = [{'rule':r} for r in fd.get('rules')]
+    msg = message_converter.convert_dictionary_to_ros_message('irols/FIS',fd)
+    return msg
+
+def fis_from_ros_msg(msg):
+    fmd = message_converter.convert_ros_message_to_dictionary(msg)
+    fmd['rules'] = [r.get('rule') for r in fmd.get('rules')]
+    fis = fis_from_dict(fmd)
+    return fis
