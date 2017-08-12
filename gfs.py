@@ -18,16 +18,23 @@ class GFS(FIS):
     A genetic representation of a Fuzzy system. Contains methods to reproduce,
     mutate, and randomize its own parameters.
     """
-    def __init__(self,in_mfs,out_mfs,name='',in_ranges=None,out_ranges=None):
+    def __init__(self,in_mfs=None,out_mfs=None,name='',in_ranges=None,out_ranges=None,fis=None):
         super(GFS,self).__init__(name=name)
-        if not hasattr(in_mfs,'__iter__'):
-            self.in_mfs = [in_mfs]
+        if in_mfs is None or out_mfs is None:
+            if fis is None:
+                raise TypeError('Must specify either in/out mfs or fis args')
+            else:
+                self.in_mfs = [len(inp.mf) for inp in fis.input]
+                self.out_mfs = [len(outp.mf) for outp in fis.output]
         else:
-            self.in_mfs = in_mfs
-        if not hasattr(out_mfs,'__iter__'):
-            self.out_mfs = [out_mfs]
-        else:
-            self.out_mfs = out_mfs
+            if not hasattr(in_mfs,'__iter__'):
+                self.in_mfs = [in_mfs]
+            else:
+                self.in_mfs = in_mfs
+            if not hasattr(out_mfs,'__iter__'):
+                self.out_mfs = [out_mfs]
+            else:
+                self.out_mfs = out_mfs
         self.in_ranges = in_ranges
         self.out_ranges = out_ranges
         self.num_in = len(self.in_mfs)
@@ -36,6 +43,14 @@ class GFS(FIS):
         
         self.init_vars()
         self.init_rules()
+        if fis is not None:
+            for self_inp,other_inp in zip(self.input,fis.input):
+                for self_mf,other_mf in zip(self_inp.mf,other_inp.mf):
+                    self_mf.params = other_mf.params
+            for self_outp,other_outp in zip(self.output,fis.output):
+                for self_mf,other_mf in zip(self_outp.mf,other_outp.mf):
+                    self_mf.params = other_mf.params[:]
+            self.rule.rules = deepcopy(fis.rule)
 
     def init_vars(self):
         if self.in_ranges is None:

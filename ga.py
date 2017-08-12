@@ -28,10 +28,15 @@ class GA(object):
         self.numRand = numRand
         self.stagnation = stagnation
         self.fitness_hist = []
+        self.seed = 0
         if cpus > 1:
             self.pool = Pool(cpus)
         else:
             self.pool = None
+
+    def seed_pop(self,seed):
+        self.pop_curr[self.seed] = deepcopy(seed)
+        self.seed += 1
 
     def add_prototype(self,proto):
         self.proto = proto

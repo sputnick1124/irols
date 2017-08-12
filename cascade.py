@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 
-from gfs import GFS
-
 class GenFuzzyCascade(object):
     def __init__(self,*gfs):
         self.gfs = gfs
