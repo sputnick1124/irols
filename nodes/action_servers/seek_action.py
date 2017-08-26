@@ -54,7 +54,6 @@ class SeekServer(object):
 
     def execute_loop(self):
         r = rospy.Rate(10)
-        
         while euclidean_distance(self.curr_pos,self.pos_sp) > 0.75:
             if not self._as.is_active():
                 continue

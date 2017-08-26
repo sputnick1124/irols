@@ -82,17 +82,21 @@ class FLCServer(object):
             return
 
         if goal.fis_array:
-            fis_list = [fisyaml.fis_from_ros_msg(msg) for msg in goal.fis_array]
+            fis_list = [fisyaml.fis_from_ros_msg(msg) for msg in goal.fis_array.fis_array.fis_array]
             self.flc.fis_list = fis_list
         rate = rospy.Rate(10)
         cmd_vel = Twist()
         pos_err = err.transform.translation
         dist =sqrt(dot([pos_err.x,pos_err.y,pos_err.z],[pos_err.x,pos_err.y,pos_err.z]))
+        count = 0
         while dist > 0.3:
             try:
                 if self._as.is_preempt_requested():
                     self._as.set_preempted(self._result)
                     return
+#                if not self._state.mode == "OFFBOARD" and count > 5:
+#                    rospy.loginfo('{0}: setpoints are primed'.format(self._action_name))
+#                    self.set_mode_client(custom_mode="OFFBOARD")
                 err = self.tf_buffer.lookup_transform('pad','base_link',rospy.Time(0))
                 pos_err = err.transform.translation
                 vx,vy,vz,dT = self.flc(err)

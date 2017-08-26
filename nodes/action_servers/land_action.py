@@ -66,6 +66,11 @@ class LandServer(object):
         while self.armed:
             self.vel_sp_pub.publish(self.land_twist)
             r.sleep
+        wait_start = rospy.Time.now()
+        wait_duration = rospy.Duration(5)
+        while rospy.Time.now() - wait_start < wait_duration:
+            self.vel_sp_pub.publish(self.land_twist)
+            r.sleep()
         self._result.success = True
         self._as.set_succeeded(self._result)
         rospy.loginfo('{0}: successfully landed and disarmed'.format(self._action_name))
