@@ -4,7 +4,7 @@
 ---
 # Result
 # cost of controller
-float32 cost
+DoLandMachineResult cost
 
 ---
 # Feedback

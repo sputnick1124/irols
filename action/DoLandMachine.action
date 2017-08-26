@@ -5,7 +5,7 @@ irols/FISArray fis_array
 ---
 # Result
 # Success/Fail
-bool success
+float32 fitness
 
 ---
 # Feedback

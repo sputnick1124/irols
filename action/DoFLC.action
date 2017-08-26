@@ -1,6 +1,7 @@
 # Goal
 # FISArray
-irols/FISArray fis_array
+#irols/FISArray fis_array
+irols/DoLandMachineGoal fis_array
 
 ---
 # Result
