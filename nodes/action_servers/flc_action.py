@@ -8,7 +8,7 @@ from irols.utils import Controller
 from yapflm import fisyaml
 
 import tf2_ros
-from tf.transformations import euler_from_quaternion as efq
+#from tf.transformations import euler_from_quaternion as efq
 from numpy import dot, sqrt, sign, matrix
 from numpy.linalg import norm
 
@@ -47,6 +47,7 @@ class FLCServer(object):
         tf_listener = tf2_ros.TransformListener(self.tf_buffer)
 
         self.cov_norm = 0
+        self.cov_sub = rospy.Subscriber('odometry/filtered',Odometry,self.odom_cb)
         self.vel_sp_pub = rospy.Publisher('mavros/setpoint_velocity/cmd_vel_unstamped',
                                       Twist,
                                       queue_size=1)
@@ -88,7 +89,6 @@ class FLCServer(object):
         cmd_vel = Twist()
         pos_err = err.transform.translation
         dist =sqrt(dot([pos_err.x,pos_err.y,pos_err.z],[pos_err.x,pos_err.y,pos_err.z]))
-        count = 0
         while dist > 0.3:
             try:
                 if self._as.is_preempt_requested():
@@ -113,7 +113,8 @@ class FLCServer(object):
                 self._feedback.distance = dist
                 self._as.publish_feedback(self._feedback)
                 rate.sleep()
-                if rospy.is_shutdown() or self.cov_norm > 0.1:
+#                rospy.loginfo('{0}: norm(covariance) = {1}'.format(self._action_name,self.cov_norm))
+                if rospy.is_shutdown() or self.cov_norm > 0.125:
                     if self._as.is_active():
                         self._as.set_aborted()
                     return

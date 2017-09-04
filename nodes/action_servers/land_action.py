@@ -4,8 +4,8 @@ import actionlib
 
 import irols.msg
 
-from mavros_msgs.msg import ExtendedState
-#from mavros_msgs.srv import CommandBool
+from mavros_msgs.msg import ExtendedState, State
+from mavros_msgs.srv import SetMode
 
 from geometry_msgs.msg import PoseStamped, Twist
 
@@ -31,6 +31,9 @@ class LandServer(object):
         self.ext_state_sub = rospy.Subscriber('mavros/extended_state',
                                               ExtendedState,
                                               self.handle_ext_state)
+        self.ext_state_sub = rospy.Subscriber('mavros/state',
+                                              State,
+                                              self.handle_state)
 
         self.curr_pos = rospy.wait_for_message('mavros/local_position/pose',
                                                PoseStamped)
@@ -41,6 +44,9 @@ class LandServer(object):
         self.vel_sp_pub = rospy.Publisher('mavros/setpoint_velocity/cmd_vel_unstamped',
                                           Twist,
                                           queue_size=1)
+                                          
+        self.set_mode_client = rospy.ServiceProxy('mavros/set_mode',
+                                                  SetMode)
 
         self.land_twist = Twist()
         self.land_twist.linear.z = -2.5
@@ -66,9 +72,12 @@ class LandServer(object):
         while self.armed:
             self.vel_sp_pub.publish(self.land_twist)
             r.sleep
-        wait_start = rospy.Time.now()
-        wait_duration = rospy.Duration(5)
-        while rospy.Time.now() - wait_start < wait_duration:
+#        wait_start = rospy.Time.now()
+#        wait_duration = rospy.Duration(5)
+#        while rospy.Time.now() - wait_start < wait_duration:
+        while not self.mode == 'AUTO.LOITER':
+            self.set_mode_client(custom_mode='AUTO.LOITER')
+#            rospy.loginfo('{0}: {1} --> {2}'.format(self._action_name,self.mode,'AUTO.LOITER'))
             self.vel_sp_pub.publish(self.land_twist)
             r.sleep()
         self._result.success = True
@@ -80,6 +89,9 @@ class LandServer(object):
     
     def handle_ext_state(self,data):
         self.landed = data.landed_state == ExtendedState.LANDED_STATE_ON_GROUND
+
+    def handle_state(self,data):
+        self.mode = data.mode
 
     def handle_arm_done(self,term_state,result):
         rospy.loginfo('{0}: listening to done result from arm_action'.format(self._action_name))

@@ -48,16 +48,23 @@ class SeekServer(object):
 
         self._as.start()
         rospy.loginfo('{0}: online'.format(self._action_name))
-        self.execute_loop()
+#        self.execute_loop()
         
 
 
     def execute_loop(self):
         r = rospy.Rate(10)
+        rospy.loginfo('{0}: euc_dist = {1}'.format(self._action_name,euclidean_distance(self.curr_pos,self.pos_sp)))
         while euclidean_distance(self.curr_pos,self.pos_sp) > 0.75:
+            if self._as.is_preempt_requested():
+                self._as.set_preempted(self._result)
+                return
             if not self._as.is_active():
-                continue
+                rospy.loginfo('{0}: no goal active. Aborting.'.format(self._action_name))
+                self._as.set_aborted()
+                return
             if not self.state.mode == "OFFBOARD":
+                rospy.loginfo('{0}: {1} --> {2}'.format(self._action_name,self.state.mode,'OFFBOARD'))
                 self.set_mode_client(custom_mode="OFFBOARD")
             
             self.pos_sp.header.stamp = rospy.Time.now()
@@ -80,6 +87,7 @@ class SeekServer(object):
         self.y_offset = goal.y_offset
         rospy.loginfo('{0}: received goal: {1}'.format(self._action_name,goal))
         rospy.loginfo('{0}: current goal state is {1}'.format(self._action_name,self._as.is_active()))
+        self.execute_loop()
     
     def preempt_cb(self):
         self._as.set_preempted(self._result)

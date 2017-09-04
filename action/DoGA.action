@@ -1,6 +1,7 @@
 # Goal
 # set hyperparams
 int16 num_gen
+int16 pop_size
 
 ---
 
@@ -15,5 +16,9 @@ float32 min_cost
 # Feedback
 # current generation
 int16 curr_gen
+# current individual
+int16 curr_ind
 # curr best fitness
 float32 curr_min_cost
+# curr fitness
+float32 curr_cost
