@@ -4,6 +4,8 @@ import smach
 import smach_ros
 
 from nav_msgs.msg import Odometry
+from sensor_msgs.msg import Imu
+from std_srvs.srv import Empty
 
 from irols.msg import (DoSeekAction, DoSeekGoal,
                        DoFitnessAction,
@@ -15,6 +17,19 @@ from irols.msg import (DoSeekAction, DoSeekGoal,
 import numpy as np
 from numpy.linalg import norm
 
+def reset_world():
+    rospy.logwarn('Flip detected. Resetting.')
+    srv = rospy.ServiceProxy('/gazebo/reset_world',Empty)
+    srv()
+    rospy.sleep(1)
+    srv()
+    rospy.sleep(1)
+    srv()
+
+def imu_cb(msg):
+    if msg.linear_acceleration.z < -9: #we're upside down
+        reset_world()
+
 def covariance_cb(ud, msg):
     cov = msg.pose.covariance
     cov_mx = np.matrix(cov).reshape((6,6))[:3,:3]
@@ -25,6 +40,8 @@ def covariance_cb(ud, msg):
         
 
 rospy.init_node('land_machine_server')
+
+rospy.Subscriber('/mavros/imu/data',Imu,imu_cb)
 
 land_machine = smach.StateMachine(outcomes=['succeeded',
                                             'aborted',

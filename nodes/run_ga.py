@@ -17,17 +17,18 @@ if __name__ == '__main__':
         num_gen = int(sys.argv[1])
         pop_size = int(sys.argv[2])
         rospy.loginfo('Running GA with {0} generations and {1} individuals'.format(num_gen,pop_size))
+        goal = DoGAGoal(num_gen=num_gen,
+                        pop_size=pop_size)
     else:
-        rospy.loginfo('Running GA with {0} generations and {1} individuals'.format(10,50))
-    goal = DoGAGoal(num_gen=num_gen,
-                    pop_size=pop_size)
+        rospy.loginfo('Running GA with {0} generations and {1} individuals'.format(5,20))
+        goal = DoGAGoal()
     try:
         client.send_goal(goal,feedback_cb=fb_cb)
         client.wait_for_result()
         result = client.get_result()
         fis_names = ['x_fis','y_fis','z_fis','T_fis']
         for rosfis,name in zip(result.fis_array.fis_array,fis_names):
-            fis = fisyaml.fis_from_rosmsg(rosfis)
+            fis = fisyaml.fis_from_ros_msg(rosfis)
             fisyaml.fis_to_yaml(fis,name+'result.yaml')
     except rospy.ROSInterruptException():
         client.cancel_all_goals()
