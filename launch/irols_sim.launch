@@ -17,7 +17,7 @@
 
     <include file="$(find irols)/launch/irols.launch"/>
 
-    <node pkg="rviz" type="rviz" name="rviz" args="-d $(find irols)/configs/irols_tf.rviz"/>
+    <node pkg="rviz" type="rviz" unless="$(arg headless)" name="rviz" args="-d $(find irols)/configs/irols_tf.rviz"/>
 <!--
     <node pkg="smach_viewer" type="smach_viewer.py" name="sm_viewer"/>
 -->
