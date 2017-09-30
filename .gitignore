@@ -47,6 +47,9 @@ qtcreator-*
 # Catkin custom files
 CATKIN_IGNORE
 
+#Ignore bagfiles since they can be huge
+bags/
+
 # Nano
 .*swp
 .*save
