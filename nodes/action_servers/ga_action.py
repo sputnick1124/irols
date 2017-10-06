@@ -36,7 +36,8 @@ class GAServer(object):
                                                 execute_cb=self.execute,
                                                 auto_start=False)
 
-        self.ga = ga.GA(popSize=50,genMax=5,cpus=1)
+        self.ga = ga.GA(popSize=20,genMax=5,cpus=1,
+                        numElite=3,numRecomb=10,numMut=5,numRand=2)
         xy_fis_dict = rospy.get_param('x_fis')
         xy_fis = fisyaml.fis_from_dict(xy_fis_dict)
         z_fis_dict = rospy.get_param('z_fis')
@@ -44,26 +45,29 @@ class GAServer(object):
 
         gfs_list = [gfs.GFS(fis=fis,in_ranges=[(-1,1),(-1,1)],out_ranges=[(-1,1)]) for fis in [xy_fis,z_fis]]
 
-        csc = cascade.GenFuzzyCascade(*gfs_list)
+        self.csc = cascade.GenFuzzyCascade(*gfs_list)
         
-        self.ga.add_prototype(csc)
-        self.ga.init_population()
-        self.ga.seed_pop(csc)
+        self.ga.add_prototype(self.csc)
         self.ga.add_fitness(land_machine_action_client)
-        self.cur_best_ind = 0
         
         self._as.start()
         rospy.loginfo('{}: online'.format(self._action_name))
 
     def execute(self,goal):
         rospy.loginfo('{0}: received goal: {1}'.format(self._action_name,goal))
-        self.ga.genMax = goal.num_gen
-        self.ga.popSize = goal.pop_size
+        self.cur_best_ind = 0
+        self.bests = []
+        if goal.num_gen:
+            self.ga.genMax = goal.num_gen
+        if goal.pop_size:
+            self.ga.popSize = goal.pop_size
+        self.ga.init_population()
+        self.ga.seed_pop(self.csc)
         self._feedback.curr_min_cost = float('inf')
-        for gen in xrange(goal.num_gen-1):
+        for gen in xrange(self.ga.genMax-1):
             self._feedback.curr_gen = gen
-            self._as.publish_feedback(self._feedback)
             self.eval_population()
+            self.bests.append(self.ga.pop_curr[0])
             self.ga.iter_generation()
         self._feedback.curr_gen += 1
         self.eval_population()
@@ -79,6 +83,8 @@ class GAServer(object):
         """
         fitnessvalues = []
         for i,ind in enumerate(self.ga.pop_curr):
+            if len(self.bests) > 0:
+                rospy.loginfo('{0}: (cur_elite == cur_best)={1}'.format(self._action_name,self.bests[-1]==self.ga.pop_curr[0]))
             if self._as.is_preempt_requested():
                 self._result.min_cost = self._feedback.curr_min_cost
                 fis_array = [fisyaml.fis_to_ros_msg(fis) for fis in self.ga.pop_curr[self.cur_best_ind].gfs]

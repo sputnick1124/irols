@@ -14,17 +14,19 @@ waypoints = {name:DoWPGoal() for name in ['WP0','WP1','WP2','WP3','LAND']}
 
 waypoints['WP0'].goal_pos.position.z = 2
 
-waypoints['WP1'].goal_pos.position.x = 2
-waypoints['WP1'].goal_pos.position.y = 2
-waypoints['WP1'].goal_pos.position.z = 2
+alt = 3.5
 
-waypoints['WP2'].goal_pos.position.x = 2
-waypoints['WP2'].goal_pos.position.y = -2
-waypoints['WP2'].goal_pos.position.z = 2
+waypoints['WP1'].goal_pos.position.x = 3.25
+waypoints['WP1'].goal_pos.position.y = 3.25
+waypoints['WP1'].goal_pos.position.z = alt
 
-waypoints['WP3'].goal_pos.position.x = -2
-waypoints['WP3'].goal_pos.position.y = -2
-waypoints['WP3'].goal_pos.position.z = 2
+waypoints['WP2'].goal_pos.position.x = 2.25
+waypoints['WP2'].goal_pos.position.y = 2.25
+waypoints['WP2'].goal_pos.position.z = alt
+
+waypoints['WP3'].goal_pos.position.x = 2.25
+waypoints['WP3'].goal_pos.position.y = 3.25
+waypoints['WP3'].goal_pos.position.z = alt
 
 def covariance_cb(ud, msg):
     cov = msg.pose.covariance
@@ -66,32 +68,28 @@ def main():
                                                                  goal=waypoints['WP3']))
             smach.Sequence.add('WP4',smach_ros.SimpleActionState('wp_action',
                                                                  DoWPAction,
-                                                                 goal=waypoints['WP0']))
+                                                                 goal=waypoints['WP2']))
+            smach.Sequence.add('WP5',smach_ros.SimpleActionState('wp_action',
+                                                                 DoWPAction,
+                                                                 goal=waypoints['WP3']))
+            smach.Sequence.add('WP6',smach_ros.SimpleActionState('wp_action',
+                                                                 DoWPAction,
+                                                                 goal=waypoints['WP1']))
+            smach.Sequence.add('WP7',smach_ros.SimpleActionState('wp_action',
+                                                                 DoWPAction,
+                                                                 goal=waypoints['WP3']))
+            smach.Sequence.add('WP8',smach_ros.SimpleActionState('wp_action',
+                                                                 DoWPAction,
+                                                                 goal=waypoints['WP2']))
+            smach.Sequence.add('WP9',smach_ros.SimpleActionState('wp_action',
+                                                                 DoWPAction,
+                                                                 goal=waypoints['WP1']))
          
         smach.StateMachine.add('WAYPOINTS',waypoint_sequence,
-                                transitions={'succeeded':'TRACK',
+                                transitions={'succeeded':'LAND',
                                              'preempted':'preempted',
                                              'aborted':'aborted'})
-
-        track_machine = smach.Concurrence(outcomes=['locked','notready'],
-                                          default_outcome='notready',
-                                          outcome_map={'locked':
-                                              { 'COV_MONITOR':'invalid',
-                                                'SEEK':'succeeded'}})
         
-        with track_machine:
-            
-            smach.Concurrence.add('SEEK',smach_ros.SimpleActionState('track_action',
-                                                                       DoTrackAction,
-                                                                       goal=DoTrackGoal(alt_sp=15)))
-
-            smach.Concurrence.add('COV_MONITOR',smach_ros.MonitorState('odometry/filtered',
-                                                                        Odometry,
-                                                                        covariance_cb))
-
-        smach.StateMachine.add('TRACK',track_machine,
-                               transitions={'notready':'TRACK',
-                                            'locked':'LAND'})
         smach.StateMachine.add('LAND',smach_ros.SimpleActionState('land_action',
                                                               DoLandAction),
                            {'succeeded':'succeeded',

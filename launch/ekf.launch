@@ -28,7 +28,7 @@
         <param name="imu0_remove_gravitational_acceleration" value="true"/>
 
 
-        <remap from="cmd_vel" to="mavros/velocity_setpoint/cmd_vel"/>
+        <remap from="cmd_vel" to="mavros/velocity_setpoint/cmd_vel_unstamped"/>
         <param name="use_control" value="true"/>
         <param name="stamped_control" value="false"/>
         <rosparam param="control_config">[true, true, true,
