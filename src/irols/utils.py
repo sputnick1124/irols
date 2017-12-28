@@ -2,7 +2,9 @@
 from tf.transformations import euler_from_quaternion as efq
 from geometry_msgs.msg import Pose, PoseStamped
 
-from math import sqrt
+from math import sqrt, log
+import numpy as np
+
 
 class StateError(object):
     def __init__(self):
@@ -65,3 +67,29 @@ def euclidean_distance(pose_a,pose_b,ignore_z=False):
     else:
         dz = b.z - a.z
     return sqrt(dx*dx + dy*dy + dz*dz)
+
+def fitness_fcn(pos_err):
+    """
+    Compute the fitness of the landing attempt.
+
+    Parameters:
+        x_err, y_err, z_err: Time histories of error
+
+    Returns:
+        J: the fitness
+    """
+    dt = 0.001
+    xy_dist = np.linalg.norm(pos_err[:,:2], axis=1)
+    slant_range = np.linalg.norm(pos_err, axis=1)
+    ix = slant_range > 0.1
+    t = np.arange(0, dt*len(ix), dt)
+    A = np.vstack([t, np.ones(len(ix))]).T
+    slope, yint = np.linalg.lstsq(A, slant_range[ix])[0]
+    slope = -abs(slope)
+
+    log_inv_slant_range = np.log(1/slant_range)
+    err_cost = (xy_dist**2)*(log_inv_slant_range - log_inv_slant_range.min())
+    tm_cost = (slant_range - yint - slope*t)**2
+    J = cost + tm_cost
+
+
