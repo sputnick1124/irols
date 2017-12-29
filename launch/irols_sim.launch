@@ -1,6 +1,7 @@
 <launch>
     <arg name="gui" default="true"/>
     <arg name="headless" default="false"/>
+    <arg name="cheat" default="false"/>
     <include file="$(find px4)/launch/mavros_posix_sitl.launch">
         <env name="PX4_HOME_LAT" value="39.251424"/>
         <env name="PX4_HOME_LON" value="-84.392328"/>
@@ -17,6 +18,7 @@
 
     <include file="$(find irols)/launch/irols.launch"/>
 
+    <node pkg="irols" type="estimator_transforms.py" name="cheat" if="$(arg cheat)"/>
     <node pkg="rviz" type="rviz" unless="$(arg headless)" name="rviz" args="-d $(find irols)/configs/irols_tf.rviz"/>
 <!--
     <node pkg="smach_viewer" type="smach_viewer.py" name="sm_viewer"/>

@@ -32,6 +32,5 @@ if __name__ == '__main__':
             fisyaml.fis_to_yaml(fis,name+'result.yaml')
     except rospy.ROSInterruptException():
         client.cancel_all_goals()
-    except Exception as e:
+    finally:
         client.cancel_all_goals()
-        raise(e)

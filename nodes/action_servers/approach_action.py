@@ -33,7 +33,8 @@ def imu_cb(msg):
 def covariance_cb(ud, msg):
     cov = msg.pose.covariance
     cov_mx = np.matrix(cov).reshape((6,6))[:3,:3]
-    if norm(cov_mx) < 0.1:
+#    rospy.loginfo('land_mach_action: norm(cov) = {}'.format(norm(cov_mx)))
+    if norm(cov_mx) < 0.5:
         return False
     else:
         return True

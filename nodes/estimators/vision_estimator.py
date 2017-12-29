@@ -37,12 +37,12 @@ class VisEstimator(object):
             'vision_estimate',
             Odometry,
             queue_size=10)
-        self.cov = [0.25, 0, 0, 0, 0, 0,
-                    0, 0.25, 0, 0, 0, 0,
-                    0, 0, 0.5, 0, 0, 0,
-                    0, 0, 0, 5, 0, 0,
-                    0, 0, 0, 0, 5, 0,
-                    0, 0, 0, 0, 0, 5]
+        self.cov = [5, 0, 0, 0, 0, 0,
+                    0, 5, 0, 0, 0, 0,
+                    0, 0, 5, 0, 0, 0,
+                    0, 0, 0, 15, 0, 0,
+                    0, 0, 0, 0, 15, 0,
+                    0, 0, 0, 0, 0, 15]
                 
         # Set up camera stuff
         self.bridge = CvBridge()

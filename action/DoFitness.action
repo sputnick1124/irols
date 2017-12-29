@@ -8,4 +8,4 @@ DoLandMachineResult cost
 
 ---
 # Feedback
-float32 rms_h_accel
+float32 pos_err

@@ -76,6 +76,8 @@ def handle_gazebo_states(msg):
 
 if __name__ == "__main__":
     rospy.init_node("gazebo_tf")
+    while not 'lezl' in rospy.wait_for_message('gazebo/model_states',ModelStates).name:
+        rospy.sleep(rospy.Duration(0.1))
     rospy.Subscriber("gazebo/model_states",ModelStates,handle_gazebo_states)
     rospy.Subscriber("vision_estimate",Odometry,handle_vision_est)
     rospy.Subscriber("apriltag_estimate",Odometry,handle_apriltag_est)

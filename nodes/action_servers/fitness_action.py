@@ -1,14 +1,18 @@
 #!/usr/bin/env python
 import rospy
 import actionlib
+from rospkg import RosPack
 
 import irols.msg
 from sensor_msgs.msg import Imu
 from gazebo_msgs.msg import ModelStates
 from std_srvs.srv import Empty
 
-from math import sqrt
-from itertools import izip
+from math import sqrt, log
+import numpy as np
+from functools import partial
+from datetime import datetime
+import os
 
 def unpack_xyz(msg):
     return (msg.x, msg.y, msg.z)
@@ -24,6 +28,21 @@ class FitnessServer(object):
                                                 execute_cb=self.execute,
                                                 auto_start=False)
 
+        self.time_hist = []
+        self.lezl_pos_hist = []
+        self.p3at_pos_hist = []
+        gz_poses = rospy.wait_for_message('gazebo/model_states',ModelStates)
+        while 'lezl' not in gz_poses.name:
+            gz_poses = rospy.wait_for_message('gazebo/model_states',ModelStates)
+            
+        ix_p3at = gz_poses.name.index('pioneer3at_lander')
+        ix_lezl = gz_poses.name.index('lezl')
+        self.imu_sub = rospy.Subscriber('gazebo/model_states',
+                                        ModelStates,
+                                        partial(self.handle_gz_states,
+                                                ix_lezl=ix_lezl,
+                                                ix_p3at=ix_p3at))
+        
         self.accels = []
         rospy.wait_for_message('mavros/imu/data',Imu)
         self.imu_sub = rospy.Subscriber('mavros/imu/data',
@@ -37,12 +56,20 @@ class FitnessServer(object):
                                              latch=True)
         
         self.reset_service = rospy.ServiceProxy('/gazebo/reset_world',Empty)
+        
+        rp = RosPack()
+        self.log_path = os.path.join(rp.get_path('irols'),'bags','logs')
  
-        self._as.start() 
+        self._as.start()
         rospy.loginfo('{}: online'.format(self._action_name))
 
 
     def execute(self,goal):
+        # reset histories (maybe not necessary?)
+        rospy.loginfo("{0}: recieved goal: {1}".format(self._action_name, goal))
+        self.time_hist = []
+        self.lezl_pos_hist = []
+        self.p3at_pos_hist = []
         start = rospy.Time.now()
         self.state.state = irols.msg.SimState().ACTIVE
         self.state.header.stamp = start
@@ -65,21 +92,31 @@ class FitnessServer(object):
         self.state.header.stamp = rospy.Time.now()
         self.sim_state_pub.publish(self.state)
         
-        gz_poses = rospy.wait_for_message('gazebo/model_states',ModelStates)
-        p3at_idx = gz_poses.name.index('pioneer3at_lander')
-        lezl_idx = gz_poses.name.index('lezl')
-        x_offset = gz_poses.pose[p3at_idx].position.x-gz_poses.pose[lezl_idx].position.x
-        y_offset = gz_poses.pose[p3at_idx].position.y-gz_poses.pose[lezl_idx].position.y
-        z_offset = gz_poses.pose[p3at_idx].position.z-gz_poses.pose[lezl_idx].position.z
-        pos_err = sqrt(x_offset**2 + y_offset**2 + z_offset**2)
-        err_tups = (unpack_xyz(msg) for msg in self.accels)
-        xddots,yddots,zddots = izip(*err_tups)
-        x_rms = sqrt(sum(x**2 for x in xddots)/len(self.accels))
-        y_rms = sqrt(sum(y**2 for y in yddots)/len(self.accels))
-        z_rms = sqrt(sum((z-9.81)**2 for z in zddots)/len(self.accels))
-#        z_rms = sqrt(sum(z**2 for z in zddots)/len(self.accels))
-        self._result.cost.fitness = 1*pos_err + 0.1*(x_rms+y_rms+z_rms)
+        gz_tm = np.array(self.time_hist)
+        lezl_pos_hist = np.array(self.lezl_pos_hist)
+        p3at_pos_hist = np.array(self.p3at_pos_hist)
+        p3at_pos_hist[:,2] += 0.537 # raise the goal point to Lezl's C.G.
+
+        pos_error = np.abs(lezl_pos_hist - p3at_pos_hist)
+        xy_dist = np.linalg.norm(pos_error[:,:2], axis=1)
+        slant_range = np.linalg.norm(pos_error, axis=1)
+        ix = slant_range > 0.1
+        A = np.vstack([gz_tm[ix] - gz_tm[0],np.ones(len(gz_tm[ix]))]).T
+        slope, yint = np.linalg.lstsq(A, slant_range[ix])[0]
+        slope = -abs(slope)
+        log_inv_slant_range = np.log(1/slant_range)
+        err_cost = (xy_dist**2)*(log_inv_slant_range  - log_inv_slant_range.min())
+        tm_cost = (slant_range - yint - slope*(gz_tm-gz_tm[0]))**2
+        cost = err_cost + tm_cost
+        postfix = datetime.strftime(datetime.now(),"_%y%m%d%H%M%S")
+        fname = ''.join(['simdata',postfix,'.txt'])
+        fpath = os.path.join(self.log_path, fname)
+        np.savetxt(fpath, np.hstack((lezl_pos_hist,p3at_pos_hist)))
+
+        self._result.cost.fitness = np.sum(cost[ix]**2)
         self._as.set_preempted(self._result)
+        print("!!!!!!!!!!!!!!!!!!!DONE!!!!!!!!!!!!!!!!!!!!!!")
+        
 
     def handle_imu(self,data):
         if self._as.is_active():
@@ -87,7 +124,22 @@ class FitnessServer(object):
             xddot = self.accels[-1].x
             yddot = self.accels[-1].y
             zddot = self.accels[-1].z - 9.81
-            self._feedback.rms_h_accel = sqrt((xddot**2 + yddot**2 + zddot**2)/3)
+            self._feedback.pos_err = sqrt((xddot**2 + yddot**2 + zddot**2)/3)
+            self._as.publish_feedback(self._feedback)
+
+    def handle_gz_states(self,msg,ix_lezl,ix_p3at):
+        if self._as.is_active():
+            self.time_hist.append(rospy.Time.now().to_sec())
+            self.lezl_pos_hist.append(unpack_xyz(msg.pose[ix_lezl].position))
+            self.p3at_pos_hist.append(unpack_xyz(msg.pose[ix_p3at].position))
+            lx0, ly0, lz0 = self.lezl_pos_hist[0]
+            px0, py0, pz0 = self.p3at_pos_hist[0]
+            lx, ly, lz = self.lezl_pos_hist[-1]
+            px, py, pz = self.p3at_pos_hist[-1]
+            xy_dist = sqrt((lx-px)**2 + (ly - py)**2)
+            dist = sqrt((lx-px)**2 + (ly - py)**2 + (lz - pz)**2)
+            dist0 = sqrt((lx0 - px0)**2 + (ly0 - py0)**2 + (lz0 - pz0)**2)
+            self._feedback.pos_err += (xy_dist**2)*(log(1/dist) - log(1/dist0))
             self._as.publish_feedback(self._feedback)
 
 if __name__ == '__main__':

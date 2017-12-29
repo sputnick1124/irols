@@ -15,6 +15,18 @@ from numpy.linalg import norm
 from geometry_msgs.msg import Twist
 from nav_msgs.msg import Odometry
 
+class IROLSTimer(rospy.Timer):
+    def __init__(self,*args,**kwargs):
+        super(IROLSTimer,self).__init__(*args,**kwargs)
+        self._shutdown = False    
+
+    def shutdown(self):
+        super(IROLSTimer,self).shutdown()
+        self._shutdown = True
+
+    def is_shutdown(self):
+        return any([self._shutdown,not self.is_alive()])
+
 class FuzzyController(Controller):
     def __init__(self,fis_list,scales):
         super(FuzzyController,self).__init__()
@@ -68,13 +80,17 @@ class FLCServer(object):
             return
         fis_list = [fisyaml.fis_from_dict(fd) for fd in fis_dicts]
         self.flc = FuzzyController(fis_list,[1,1,1,1])
+        
+        self.abort_timer = None
+        self.aborted = False
 
         self._as.start()
         rospy.loginfo('{0}: online'.format(self._action_name))
 
     def execute(self,goal):
+        self.aborted = False
         try:
-            err = self.tf_buffer.lookup_transform('pad','base_link',rospy.Time(0))
+            err = self.tf_buffer.lookup_transform('pad','base_link_true',rospy.Time(0))
         except (tf2_ros.LookupException,
                 tf2_ros.ConnectivityException,
                 tf2_ros.ExtrapolationException) as e:
@@ -89,7 +105,7 @@ class FLCServer(object):
         cmd_vel = Twist()
         pos_err = err.transform.translation
         dist =sqrt(dot([pos_err.x,pos_err.y,pos_err.z],[pos_err.x,pos_err.y,pos_err.z]))
-        while dist > 0.3:
+        while dist > 0.5 and self._as.is_active():
             try:
                 if self._as.is_preempt_requested():
                     self._as.set_preempted(self._result)
@@ -97,7 +113,8 @@ class FLCServer(object):
 #                if not self._state.mode == "OFFBOARD" and count > 5:
 #                    rospy.loginfo('{0}: setpoints are primed'.format(self._action_name))
 #                    self.set_mode_client(custom_mode="OFFBOARD")
-                err = self.tf_buffer.lookup_transform('pad','base_link',rospy.Time(0))
+                err = self.tf_buffer.lookup_transform('pad','base_link_true',rospy.Time(0))
+                #err = self.tf_buffer.lookup_transform('pad','base_link',rospy.Time(0))
                 pos_err = err.transform.translation
                 vx,vy,vz,dT = self.flc(err)
                 cmd_vel.linear.x = vx
@@ -114,18 +131,31 @@ class FLCServer(object):
                 self._as.publish_feedback(self._feedback)
                 rate.sleep()
 #                rospy.loginfo('{0}: norm(covariance) = {1}'.format(self._action_name,self.cov_norm))
-                if rospy.is_shutdown() or self.cov_norm > 0.125:
-                    if self._as.is_active():
-                        self._as.set_aborted()
+                if (rospy.is_shutdown() or self.cov_norm > 0.125) and self._as.is_active():
+                    if self.abort_timer is None or self.abort_timer.is_shutdown():
+                        rospy.loginfo("{0}: covariance grew too large. Setting abort timer".format(self._action_name))
+                        self.abort_timer = IROLSTimer(rospy.Duration(2),self.abort_cb,oneshot=True)
+                elif self.abort_timer is not None and not self.abort_timer.is_shutdown():
+                    rospy.loginfo("{0}: covariance improved within time limit. Resuming".format(self._action_name))
+                    self.abort_timer.shutdown()
+                elif self.aborted:
+                    rospy.loginfo("{0}: aborted".format(self._action_name))
                     return
+                        
             except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException):
                 rate.sleep()
                 continue
-
+        rospy.loginfo("{0}: dist={1}, self._as._isactive()=".format(self._action_name,dist,self._as.is_active()))
         self._result.final_err.x = pos_err.x
         self._result.final_err.y = pos_err.y
         self._result.final_err.z = pos_err.z
         self._as.set_succeeded(self._result)
+
+    def abort_cb(self,event):
+        if self._as.is_active():
+            rospy.loginfo("{0}: aborting".format(self._action_name))
+            self.aborted = True
+            self._as.set_aborted()
     
     def odom_cb(self,msg):
         cov = msg.pose.covariance
