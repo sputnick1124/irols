@@ -4,6 +4,7 @@ import actionlib
 from rospkg import RosPack
 
 import irols.msg
+from irols.utils import fitness_fcn
 from sensor_msgs.msg import Imu
 from gazebo_msgs.msg import ModelStates
 from std_srvs.srv import Empty
@@ -98,22 +99,23 @@ class FitnessServer(object):
         p3at_pos_hist[:,2] += 0.537 # raise the goal point to Lezl's C.G.
 
         pos_error = np.abs(lezl_pos_hist - p3at_pos_hist)
-        xy_dist = np.linalg.norm(pos_error[:,:2], axis=1)
-        slant_range = np.linalg.norm(pos_error, axis=1)
-        ix = slant_range > 0.1
-        A = np.vstack([gz_tm[ix] - gz_tm[0],np.ones(len(gz_tm[ix]))]).T
-        slope, yint = np.linalg.lstsq(A, slant_range[ix])[0]
-        slope = -abs(slope)
-        log_inv_slant_range = np.log(1/slant_range)
-        err_cost = (xy_dist**2)*(log_inv_slant_range  - log_inv_slant_range.min())
-        tm_cost = (slant_range - yint - slope*(gz_tm-gz_tm[0]))**2
-        cost = err_cost + tm_cost
+        #xy_dist = np.linalg.norm(pos_error[:,:2], axis=1)
+        #slant_range = np.linalg.norm(pos_error, axis=1)
+        #ix = slant_range > 0.1
+        #A = np.vstack([gz_tm[ix] - gz_tm[0],np.ones(len(gz_tm[ix]))]).T
+        #slope, yint = np.linalg.lstsq(A, slant_range[ix])[0]
+        #slope = -abs(slope)
+        #log_inv_slant_range = np.log(1/slant_range)
+        #err_cost = (xy_dist**2)*(log_inv_slant_range  - log_inv_slant_range.min())
+        #tm_cost = (slant_range - yint - slope*(gz_tm-gz_tm[0]))**2
+        #cost = err_cost + tm_cost
+        cost = fitness_fcn(pos_error)[0]
         postfix = datetime.strftime(datetime.now(),"_%y%m%d%H%M%S")
         fname = ''.join(['simdata',postfix,'.txt'])
         fpath = os.path.join(self.log_path, fname)
         np.savetxt(fpath, np.hstack((lezl_pos_hist,p3at_pos_hist)))
 
-        self._result.cost.fitness = np.sum(cost[ix]**2)
+        self._result.cost.fitness = cost
         self._as.set_preempted(self._result)
         print("!!!!!!!!!!!!!!!!!!!DONE!!!!!!!!!!!!!!!!!!!!!!")
         

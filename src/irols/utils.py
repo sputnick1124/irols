@@ -79,17 +79,21 @@ def fitness_fcn(pos_err):
         J: the fitness
     """
     dt = 0.001
-    xy_dist = np.linalg.norm(pos_err[:,:2], axis=1)
-    slant_range = np.linalg.norm(pos_err, axis=1)
-    ix = slant_range > 0.1
-    t = np.arange(0, dt*len(ix), dt)
-    A = np.vstack([t, np.ones(len(ix))]).T
-    slope, yint = np.linalg.lstsq(A, slant_range[ix])[0]
-    slope = -abs(slope)
+    #xy_dist = np.linalg.norm(pos_err[:,:2], axis=1)
+    #slant_range = np.linalg.norm(pos_err, axis=1)
+    #t = np.arange(0, dt*len(slant_range), dt)
+    #A = np.vstack([t, np.ones(len(slant_range))]).T
+    #slope, yint = np.linalg.lstsq(A, slant_range)[0]
+    #slope = -abs(slope)
+    t = np.arange(0, dt*len(pos_err), dt)
+    ie = np.sum(np.linalg.norm(pos_err[:,:2], axis=1))
+    iae = np.sum(np.linalg.norm(pos_err, axis=1))
+    itae = np.sum(t*np.linalg.norm(pos_err, axis=1))
 
-    log_inv_slant_range = np.log(1/slant_range)
-    err_cost = (xy_dist**2)*(log_inv_slant_range - log_inv_slant_range.min())
-    tm_cost = (slant_range - yint - slope*t)**2
-    J = cost + tm_cost
+    #log_inv_slant_range = np.log(1/slant_range)
+    #err_cost = (xy_dist**2)*(log_inv_slant_range - log_inv_slant_range.min())
+    #tm_cost = (slant_range - yint - slope*t)**2
+    J = np.linalg.norm(pos_err[-1,:])
 
+    return J, ie, iae, itae, t
 
