@@ -4,6 +4,7 @@ from geometry_msgs.msg import Pose, PoseStamped
 
 from math import sqrt, log
 import numpy as np
+from numpy.core.umath_tests import inner1d
 
 
 class StateError(object):
@@ -86,14 +87,22 @@ def fitness_fcn(pos_err):
     #slope, yint = np.linalg.lstsq(A, slant_range)[0]
     #slope = -abs(slope)
     t = np.arange(0, dt*len(pos_err), dt)
-    ie = np.sum(np.linalg.norm(pos_err[:,:2], axis=1))
+    t_normed = t/np.linalg.norm(t)
+    p_norms = np.linalg.norm(pos_err[:, :3], axis=1)
+    p_units = (pos_err[:, :3].T/p_norms).T
+    if pos_err.shape[-1] > 3:
+        v_units = (pos_err[:, 3:].T/np.linalg.norm(pos_err[:, 3:], axis=1)).T
+        ie = inner1d(p_units, v_units) + 1
+        ie[pos_err[:,2] < 0.5] = 0
+    else:
+        ie = t_normed
     iae = np.sum(np.linalg.norm(pos_err, axis=1))
     itae = np.sum(t*np.linalg.norm(pos_err, axis=1))
 
     #log_inv_slant_range = np.log(1/slant_range)
     #err_cost = (xy_dist**2)*(log_inv_slant_range - log_inv_slant_range.min())
     #tm_cost = (slant_range - yint - slope*t)**2
-    J = np.linalg.norm(pos_err[-1,:])
+    J = np.dot(t_normed, ie) * np.linalg.norm(pos_err[-1,:3])
 
     return J, ie, iae, itae, t
 
